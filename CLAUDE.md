@@ -20,6 +20,15 @@ This already went wrong once: 105px in one file against 176px in another.
 body copy at 4.63:1, .18 at 4.16:1, .26 at 3.33:1. Above .14 text sitting
 directly on the ribbon starts to disappear.
 
+**The backdrop's field texture stores a SCALAR, not colour.** The ribbon edge
+is cut from it at full resolution in the finish pass. That is deliberate: a
+smooth gradient magnifies cleanly by any factor, but the hard edge of a
+smoothstep facets badly, and interpolating the edge is what made an earlier
+build look like it was rendered at 144px. So `scale` now controls how much
+detail the form has, never how crisp its edge is. The target is half float for
+the same reason: at 8 bits the core's 0.055 width is about 14 levels and the
+edge bands.
+
 **Measure the backdrop on a real GPU.** Headless Chromium defaults to
 SwiftShader, which rasterises on the CPU and wildly over-penalises both
 `backdrop-filter` and heavy fragment shaders. It reported a 2.5x desktop
