@@ -23,12 +23,19 @@
     c2: '#256F6E',     // the second brand teal, the darker one
     bg: '#0B0C0D',     // page night, what the field is composited over
 
-    gain: 0.38,        // overall brightness. The reference ships 0.62, which is
-                       // a lit showcase on its own page. This is a background
-                       // behind copy, so it is turned down, but 0.20 put it
-                       // level with the old beams and read as no change at all.
-                       // Measured at 0.38 the brightest ribbons land near
-                       // #404D4B on the page once the layer opacity is applied.
+    /* gain and sat trade against each other, measured: the tonemap desaturates
+       as it is driven harder, so brightness bought here costs colour.
+         gain .62 sat 1.55 -> brightest ribbons  9% saturated
+         gain .62 sat 2.4  -> 14%
+         gain .40 sat 2.4  -> 22%
+         gain .40 sat 3.2  -> 31%
+       So colour is taken from the shader at a modest gain, and presence is
+       taken from the layer opacity in main.js instead, which is a straight
+       composite and does not touch saturation. */
+    gain: 0.42,        // overall brightness of the field itself
+    sat: 3.0,          // vibrance, applied after the tonemap. The brand cyan is
+                       // a pale one (74% lightness), so it greys out fast when
+                       // pushed; this pushes each pixel back off its own grey.
     /* The three cost knobs. Field work is layers x (canvas px / scale^2), and
        the canvas is sized by dpr, so these multiply. Measured before tuning:
        56 layers, scale 2, dpr 2 put a 1440x900 desktop at a 166ms median
@@ -42,10 +49,19 @@
     angle: -Math.PI,
     speed: 0.62,
 
-    hover: 1.0,        // pointer influence, 0 turns interaction off
-    reachPx: 300,      // how far from the cursor the warp reaches, in px
-    twist: 1.05,       // how much the field rotates under the cursor
-    drag: 0.16         // how much a fast cursor smears it
+    /* Pointer influence, turned well down on request. It should read as the
+       field noticing the cursor, not being shoved by it. */
+    hover: 0.40,       // 0 turns interaction off entirely
+    reachPx: 260,      // how far from the cursor the warp reaches, in px
+    twist: 0.45,       // how much the field rotates under the cursor
+    drag: 0.06,        // how much a fast cursor smears it
+
+    /* Slow travel across the screen, so the field does not just churn in
+       place. Two incommensurate frequencies, so the path never visibly
+       repeats. wanderAmp is in the shader's own units, where 1.0 is about
+       one viewport height. */
+    wanderAmp: 0.42,
+    wanderSpin: 0.22   // radians of slow rotation on top of the travel
   };
 
   var host = document.querySelector('[data-backdrop]');
@@ -72,7 +88,8 @@
     'precision highp float;\n' +
     'uniform vec2 uRes; uniform float uTime; uniform vec3 uC1; uniform vec3 uC2;\n' +
     'uniform float uSize; uniform float uAngle; uniform vec2 uMouse; uniform float uOn;\n' +
-    'uniform float uReach; uniform vec2 uVel; uniform float uGain;\n' +
+    'uniform float uReach; uniform vec2 uVel; uniform float uGain; uniform float uSat;\n' +
+    'uniform float uWander; uniform float uSpin;\n' +
     'out vec4 o;\n' +
     'const float LAYERS = ' + CFG.layers.toFixed(1) + ';\n' +
     'const float TWIST  = ' + CFG.twist.toFixed(3) + ';\n' +
@@ -91,10 +108,13 @@
     '  vec2 d = pos - uMouse;\n' +
     '  float w = uOn * exp(-dot(d,d)/(uReach*uReach));\n' +
     '  if (w > 1e-4) pos = uMouse + rot(w*TWIST)*d*(1.0 - 0.3*min(w,1.0)) - uVel*min(w,1.0)*DRAG;\n' +
-    '  pos = rot(uAngle) * pos / uSize;\n' +
+    /* the slow travel: the whole field wanders and turns, so a given ribbon
+       crosses the screen over minutes rather than sitting in one place */
+    '  pos = rot(uAngle + sin(uTime*0.031)*uSpin) * pos / uSize;\n' +
     '  float t = uTime * 0.49 + PHASE;\n' +
     '  float breath = (-sin(uTime*0.735) + sin(uTime*0.49 + 1.0)) * 0.25 + 0.5;\n' +
-    '  vec2 u = rot(TILT) * ((pos - CENTRE) * (ZOOM - breath*0.085));\n' +
+    '  vec2 wander = vec2(sin(uTime*0.071), cos(uTime*0.053)) * uWander;\n' +
+    '  vec2 u = rot(TILT) * ((pos - CENTRE - wander) * (ZOOM - breath*0.085));\n' +
     '  mat2 fold = mat2(cos(THETA), sin(THETA), -SHEAR, cos(THETA));\n' +
     '  vec3 col = vec3(0.0);\n' +
     '  for (float i = 1.0; i <= LAYERS; i += 1.0) {\n' +
@@ -113,6 +133,7 @@
     '  vec3 x = max(col * uGain, 0.0);\n' +
     '  col = (x*(2.51*x + 0.03)) / (x*(2.43*x + 0.59) + 0.14);\n' +
     '  col = pow(clamp(col, 0.0, 1.0), vec3(0.85, 0.92, 0.98));\n' +
+    '  col = mix(vec3(dot(col, vec3(0.2126, 0.7152, 0.0722))), col, uSat);\n' +
     /* Gentle. An earlier 0.35 at 0.45 darkened the edges so hard it ate the
        ribbons, which sit off-centre by design (CENTRE is -0.62, 0.24). This
        only stops the layer ending on a hard rectangle. */
@@ -172,7 +193,7 @@
   var finishProg = link(FINISH, 'finish');
   if (!fieldProg || !finishProg) return;
 
-  var uF = uniforms(fieldProg, ['uRes','uTime','uC1','uC2','uSize','uAngle','uMouse','uOn','uReach','uVel','uGain']);
+  var uF = uniforms(fieldProg, ['uRes','uTime','uC1','uC2','uSize','uAngle','uMouse','uOn','uReach','uVel','uGain','uSat','uWander','uSpin']);
   var uN = uniforms(finishProg, ['uField','uRes','uTime','uBg']);
 
   var vao = gl.createVertexArray();
@@ -273,6 +294,9 @@
     gl.uniform1f(uF.uSize, CFG.size);
     gl.uniform1f(uF.uAngle, CFG.angle);
     gl.uniform1f(uF.uGain, CFG.gain);
+    gl.uniform1f(uF.uSat, CFG.sat);
+    gl.uniform1f(uF.uWander, CFG.wanderAmp);
+    gl.uniform1f(uF.uSpin, CFG.wanderSpin);
     gl.uniform2f(uF.uMouse, (mx - cw / 2) / ch, (ch / 2 - my) / ch);
     gl.uniform1f(uF.uOn, on * CFG.hover);
     gl.uniform1f(uF.uReach, CFG.reachPx / ch);

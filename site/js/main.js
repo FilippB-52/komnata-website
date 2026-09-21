@@ -280,7 +280,7 @@
        .backdrop is z-index:-1 and the hero video paints over it. By the time the video
        is gone the teal is already ~0.16 and rising, so there is no gap. */
     gsap.fromTo(backdrop, { opacity: 0 }, {
-      opacity: .34, ease: 'none',
+      opacity: .52, ease: 'none',
       scrollTrigger: { trigger: '#social', start: 'top bottom', end: 'bottom 55%', scrub: .8 }
     });
     /* Rendering is switched by scroll POSITION, never by reading the animated
