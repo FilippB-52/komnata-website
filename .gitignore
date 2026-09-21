@@ -8,3 +8,6 @@
 # Tooling
 /node_modules/
 /.vercel/
+
+# Secrets. Deliberately unanchored: an .env at any depth stays out.
+.env*
