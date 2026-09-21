@@ -1,0 +1,53 @@
+<!-- ======================= Ø5  MAP ======================= -->
+<section class="venue" id="map">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2 h2--art" data-reveal><img src="assets/img/headings/find-us.webp" alt="Find us" width="582" height="118" loading="lazy" decoding="async" fetchpriority="low"></h2>
+    </div>
+
+    <div class="venue__grid">
+      <div class="venue__card">
+        <!-- SWAP: confirm venue, street and metro before this goes out -->
+        <!-- The button below uses Google's documented Maps URL API, not a
+             copied share link. The share link that was here
+             (/maps/place/Frecuencia/@.../data=!3m1!4b1!4m6!3m5!1s0xd42...)
+             opened Maps with an EMPTY search bar and a blank card: its ftid
+             is 15 hex digits where Google's are 16, so the data blob was
+             dropped and only the coordinates survived. Checked in a real
+             browser past the consent wall. The search API form puts
+             "Frecuencia" in the search box and shows the place card with the
+             address and hours. Do not paste a share URL back in here. -->
+        <h3 class="venue__name">Frecuencia</h3>
+        <p class="venue__addr">Calle de Lagasca 103<br>Salamanca, 28006 Madrid</p>
+        <ul class="rows">
+          <li><span>Metro</span><b>Núñez de Balboa</b></li>
+          <li><span>Doors</span><b>23:59</b></li>
+          <li><span>Age</span><b>18+</b></li>
+        </ul>
+        <a class="btn btn--ghost btn--wide"
+           href="https://www.google.com/maps/search/?api=1&amp;query=Frecuencia%2C%20Calle%20de%20Lagasca%20103%2C%2028006%20Madrid"
+           target="_blank" rel="noopener">Open in Google Maps</a>
+      </div>
+
+      <!-- The Google embed is 1.9 MB of script, so it is only fetched once this
+           section is close. The grayscale invert is what keeps Google's white
+           map inside the palette, leave it on. Pin confirmed against the venue's
+           own Google listing: 40.4341856, -3.6846612 -->
+      <div class="venue__map">
+        <!-- ll with no q returns the map WITHOUT Google's own pin and without
+             the info card, centred exactly on the venue. That is what lets the
+             pin below be the only marker: it sits outside the iframe, so the
+             grayscale filter never touches it. Move the coordinates and the pin
+             stays correct, because it is pinned to the centre of the frame. -->
+        <div class="venue__frame" data-map
+             data-src="https://maps.google.com/maps?ll=40.4341856,-3.6846612&amp;z=16&amp;output=embed">
+          <span class="venue__map-wait">Map</span>
+        </div>
+        <svg class="pin" viewBox="0 0 28 38" aria-hidden="true">
+          <path d="M14 37C14 37 26 22.7 26 14A12 12 0 1 0 2 14c0 8.7 12 23 12 23Z"/>
+          <circle cx="14" cy="14" r="4.4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>

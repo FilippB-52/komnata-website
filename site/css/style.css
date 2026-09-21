@@ -547,6 +547,57 @@ a{color:inherit;text-decoration:none;}
 .foot__nav a:hover{color:var(--bone);}
 .foot__sign{margin:0;}
 
+/* --- NEXT NIGHT TABS ----------------------------------------------------- */
+/* Three panes in the left frame of Next Night. Added 21 Sep 2026; the state
+   before, and the steps to undo it, are in "Rollback points/01 - Find Us as
+   its own section/". */
+.tabs{
+  display:flex;gap:6px;margin-bottom:clamp(22px,2.4vw,30px);
+  border-bottom:1px solid var(--line);padding-bottom:14px;
+}
+.tabs__btn{
+  appearance:none;background:transparent;border:1px solid var(--line-2);
+  color:var(--mute);font:inherit;font-size:13px;letter-spacing:.01em;
+  padding:9px 18px;border-radius:var(--pill);cursor:pointer;
+  transition:color .25s ease,border-color .25s ease,background .25s ease;
+}
+.tabs__btn:hover{color:var(--bone);border-color:var(--bone);}
+.tabs__btn.is-on{background:var(--bone);border-color:var(--bone);color:var(--night);}
+
+/* [hidden] is what actually switches them, so a pane with no styles attached
+   still behaves. The class only drives the fade. */
+.tab__pane[hidden]{display:none;}
+.tab__pane{animation:paneIn .35s ease both;}
+@keyframes paneIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* The music pane: the record beside its details, stacking on a phone. */
+.setlist{display:flex;gap:clamp(20px,2.6vw,34px);align-items:flex-start;}
+.setlist__disc{flex:none;}
+.setlist__meta{min-width:0;}
+.setlist__meta .rows{margin-top:22px;}
+.setlist__meta .record__link{display:inline-block;margin-top:20px;}
+
+/* The map pane. Shorter than the old standalone section, because it now sits
+   inside a frame beside the ticket card rather than spanning the page. The
+   48px top crop and the pin offset come with it from .venue__map. */
+.venue__map--tab{
+  min-height:0;height:clamp(230px,22vw,300px);
+  margin-bottom:clamp(22px,2.4vw,30px);
+}
+.tab__pane .venue__name{font-size:clamp(22px,2.2vw,28px);}
+.tab__pane .venue__addr{margin-top:10px;}
+.tab__pane .rows{padding-top:22px;}
+.tab__pane .btn{margin-top:24px;}
+
+@media (max-width:760px){
+  .tabs{gap:5px;padding-bottom:12px;margin-bottom:20px;}
+  /* 44px tall, like every other control on a phone */
+  .tabs__btn{font-size:12px;padding:13px 14px;flex:1;}
+  .setlist{flex-direction:column;align-items:center;text-align:center;}
+  .setlist__meta .record__link{margin-top:16px;}
+  .venue__map--tab{height:200px;}
+}
+
 /* --- MASKED LINES ------------------------------------------------------- */
 /* Split by JS on <br>. Padding stops the mask shaving descenders, the negative
    margin hands the space straight back to the layout. */

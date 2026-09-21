@@ -356,6 +356,46 @@
     });
   }
 
+  /* --- TABS -------------------------------------------------------------- */
+  /* The three panes in Next Night's left frame. [hidden] does the switching so
+     a pane is genuinely out of the layout, not just transparent: that is what
+     keeps the map's IntersectionObserver from firing, so its 1.9 MB Google
+     embed is not fetched until someone actually opens the Map tab. */
+  var tabBar = document.querySelector('[data-tabs]');
+  if (tabBar) {
+    var btns = [].slice.call(tabBar.querySelectorAll('[data-tab]'));
+    var panes = [].slice.call(document.querySelectorAll('[data-pane]'));
+    function show(want) {
+      btns.forEach(function (b) {
+        var on = b.getAttribute('data-tab') === want;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panes.forEach(function (p) {
+        var on = p.getAttribute('data-pane') === want;
+        p.hidden = !on;
+        p.classList.toggle('is-on', on);
+      });
+      /* The vinyl in the Music pane and the map in the Map pane both size
+         themselves from a box that was display:none until now, so anything
+         measured while hidden is wrong. Nudge the listeners that care. */
+      window.dispatchEvent(new Event('resize'));
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }
+
+    tabBar.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('[data-tab]') : null;
+      if (btn) show(btn.getAttribute('data-tab'));
+    });
+
+    /* Anything else on the page can ask for a tab. The footer's "Find us" does,
+       because the map moved in here and that link has to still mean something. */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('[data-open-tab]') : null;
+      if (a) show(a.getAttribute('data-open-tab'));
+    });
+  }
+
   /* --- HEADLINES -------------------------------------------------------- */
   /* Each <br> becomes its own masked line, so a headline rises in sequence. */
   document.querySelectorAll('[data-reveal]').forEach(function (el) {
