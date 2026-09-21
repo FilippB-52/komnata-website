@@ -487,22 +487,34 @@ a{color:inherit;text-decoration:none;}
 
 /* --- TICKETS + FOOTER --------------------------------------------------- */
 .close{padding-block:var(--bay);}
+/* ONE frame. The surface, the radius and the clip live here, so the ticket
+   card and the tabs read as two halves of the same object rather than two
+   boxes with a gap between them. */
 .ticket{
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);
-  gap:clamp(12px,1.5vw,20px);align-items:start;
+  display:grid;grid-template-columns:minmax(300px,420px) minmax(0,1fr);
+  gap:0;align-items:stretch;
+  background:var(--raised);border-radius:var(--r);overflow:hidden;
 }
 .ticket__side{
-  background:var(--raised);border-radius:var(--r);
-  padding:clamp(26px,2.6vw,38px);display:flex;flex-direction:column;
+  background:none;border-radius:0;
+  border-left:1px solid var(--line);
+  padding:clamp(24px,2.4vw,34px);display:flex;flex-direction:column;
 }
 .ticket__concept{margin:0;color:var(--mute);font-size:15.5px;line-height:1.75;max-width:48ch;}
 .ticket__concept--last{margin-top:14px;color:var(--bone);}
 .ticket__side .rows{margin-top:auto;padding-top:30px;}
 .ticket__side .btn{margin-top:26px;}
 .ticket__card{
-  background:var(--raised);border-radius:var(--r);overflow:hidden;
+  background:none;border-radius:0;overflow:hidden;
   display:flex;flex-direction:column;
 }
+/* The poster keeps its own 1200/630 and the COUNTDOWN takes the slack instead,
+   centred in whatever is left below it. Letting the poster fill the column was
+   the obvious move and it was wrong: the artwork is wide, the column is tall
+   and narrow, so object-fit:cover sliced it down to "7 FRAME" with the line-up
+   and the prices cut off either side. The ratio of the box has to match the
+   ratio of the source or cover quietly destroys it. */
+.ticket__card .ticket__foot{margin-block:auto;}
 .ticket__poster{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;}
 .ticket__foot{padding:clamp(22px,2.2vw,30px);}
 .ticket__until{
@@ -518,7 +530,10 @@ a{color:inherit;text-decoration:none;}
   font-size:clamp(26px,2.6vw,36px);font-weight:500;color:var(--bone);
   font-variant-numeric:tabular-nums;letter-spacing:-.01em;
 }
-@media (max-width:900px){.ticket{grid-template-columns:1fr;}}
+@media (max-width:900px){
+  .ticket{grid-template-columns:1fr;}
+  .ticket__side{border-left:0;border-top:1px solid var(--line);}
+}
 
 .close__mail{
   margin:clamp(34px,4vw,52px) 0 0;font-size:13.5px;color:var(--mute-2);text-align:center;
@@ -556,11 +571,25 @@ a{color:inherit;text-decoration:none;}
 .tabs__btn:hover{color:var(--bone);border-color:var(--bone);}
 .tabs__btn.is-on{background:var(--bone);border-color:var(--bone);color:var(--night);}
 
-/* [hidden] is what actually switches them, so a pane with no styles attached
-   still behaves. The class only drives the fade. */
-.tab__pane[hidden]{display:none;}
-.tab__pane{animation:paneIn .35s ease both;}
-@keyframes paneIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+/* Every pane occupies the SAME grid cell, so the stack is always as tall as
+   the tallest one and switching a tab cannot resize the frame. That is the
+   whole point, and it is why the inactive ones are hidden with visibility
+   instead of [hidden] or display:none, either of which would take them out of
+   the grid and let the height jump again. */
+.tab__stack{display:grid;flex:1;}
+.tab__stack > .tab__pane{grid-area:1 / 1;}
+.tab__pane{
+  visibility:hidden;opacity:0;pointer-events:none;
+  transform:translateY(6px);
+  transition:opacity .3s ease,transform .3s ease,visibility 0s linear .3s;
+}
+.tab__pane.is-on{
+  visibility:visible;opacity:1;pointer-events:auto;transform:none;
+  transition:opacity .35s ease,transform .35s ease,visibility 0s;
+}
+@media (prefers-reduced-motion:reduce){
+  .tab__pane{transition:none;}
+}
 
 /* The music pane: the record beside its details, stacking on a phone. The
    link sits under the RECORD, not under the table, because it opens the record
@@ -580,11 +609,34 @@ a{color:inherit;text-decoration:none;}
    this height it is a large share of the box. That is what drives the numbers
    below: the venue ends up at (height/2 - 24) from the top, so the pin is
    shrunk to keep its point there without its head being clipped off. */
+/* 18+ as a mark beside the venue name rather than a row of its own: it is one
+   fact and it does not need a whole line in a table. */
+.badge{
+  display:inline-block;vertical-align:middle;margin-left:10px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--mute);border:1px solid var(--line-2);border-radius:var(--pill);
+  padding:4px 9px;translate:0 -2px;
+}
+
+/* The strip crops SIDEWAYS, not from the top, and that is what puts the pin in
+   the middle. Google's dead "Open in Maps" chip sits in the iframe's top-left
+   corner, so the old fix pulled the frame up 48px, which pushed the venue 24px
+   above centre. Widening the frame and pulling it left by the same amount on
+   both sides takes the chip out through the left edge while leaving the
+   iframe's centre, which is the venue, exactly on the container's centre both
+   ways. The Google logo and the "Map data ©2026" line sit along the middle of
+   the bottom edge and survive the crop, which the embed terms require. */
 .venue__map--tab{
   min-height:0;height:112px;
   margin-bottom:clamp(20px,2.2vw,26px);
+  --map-x-crop:150px;
 }
-.venue__map--tab .pin{width:20px;height:27px;}
+.venue__map--tab iframe{
+  top:0;left:calc(var(--map-x-crop) * -1);
+  width:calc(100% + var(--map-x-crop) * 2);
+  height:100%;
+}
+.venue__map--tab .pin{width:20px;height:27px;top:50%;}
 .tab__pane .venue__name{font-size:clamp(22px,2.2vw,28px);}
 .tab__pane .venue__addr{margin-top:10px;}
 .tab__pane .rows{padding-top:22px;}

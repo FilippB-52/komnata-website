@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=47">
+<link rel="stylesheet" href="css/style.css?v=50">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 
@@ -125,103 +125,16 @@ alt=""></noscript>
       <p class="lede lede--sm">Friday 25 September, doors 23:59, Frecuencia.</p>
     </div>
 
+    <!-- ONE frame, not two boxes. The ticket card is the left column and the
+         tabs are the right one, and the panel around both carries the surface
+         so there is no seam between them.
+
+         All three panes sit in the SAME grid cell (.tab__stack), so the frame
+         is always as tall as the tallest of them and switching a tab cannot
+         resize it. That is why the inactive panes are hidden with visibility
+         rather than [hidden]: display:none would drop them out of the grid and
+         the height would go back to jumping. -->
     <div class="ticket">
-      <!-- Three tabs, because the client wanted this frame to carry more than
-           one block of copy. Summary is what used to be here. Music and Map are
-           new: Map holds what was its own "Find us" section, which is why that
-           section is gone from the page. The state before this change, and the
-           steps to undo it, are in "Rollback points/01 - Find Us as its own
-           section/" at the project root. -->
-      <div class="ticket__side">
-        <nav class="tabs" data-tabs role="tablist" aria-label="About the night">
-          <button class="tabs__btn is-on" type="button" role="tab"
-                  data-tab="summary" aria-selected="true" aria-controls="pane-summary">Summary</button>
-          <button class="tabs__btn" type="button" role="tab"
-                  data-tab="music" aria-selected="false" aria-controls="pane-music">Music</button>
-          <button class="tabs__btn" type="button" role="tab"
-                  data-tab="map" aria-selected="false" aria-controls="pane-map">Map</button>
-        </nav>
-
-        <div class="tab__pane is-on" id="pane-summary" role="tabpanel" data-pane="summary">
-          <!-- The edition concept, as the club wrote it on the ticket page -->
-          <p class="ticket__concept">
-            No photographer tonight. Five or six disposable cameras go round the bar,
-            shooting everything: flash in your face, blur, grain, someone's back.
-            The whole roll gets developed, nothing edited out.
-          </p>
-          <p class="ticket__concept ticket__concept--last">
-            KØMNATA used to be photographed for you. Now you are the one shooting it.
-          </p>
-          <ul class="rows">
-            <li><span>Date</span><b>Fri 25 Sep 2026</b></li>
-            <li><span>Doors</span><b>23:59</b></li>
-            <li><span>Line-up</span><b>Milasmol · IlyazZz</b></li>
-            <li><span>Venue</span><b>Frecuencia, Madrid</b></li>
-          </ul>
-        </div>
-
-        <div class="tab__pane" id="pane-music" role="tabpanel" data-pane="music" hidden>
-          <div class="setlist">
-            <div class="setlist__side">
-              <div class="setlist__disc" data-vinyl
-                   data-cover="assets/img/playlists/komnata-house.webp"
-                   data-title="KØMNATA House"
-                   data-turn="13"
-                   style="--v-size:min(210px,46vw);--v-label:30%"></div>
-              <a class="record__link" href="https://open.spotify.com/playlist/01tNS52DVOTu4OtBuNrsLk"
-                 target="_blank" rel="noopener">Open on Spotify</a>
-            </div>
-            <div class="setlist__meta">
-              <p class="ticket__concept">
-                Milasmol and IlyazZz on the decks. The room's own record is here:
-                play it before you come and you already know the night.
-              </p>
-              <ul class="rows">
-                <li><span>On the decks</span><b>Milasmol · IlyazZz</b></li>
-                <li><span>Record</span><b>KØMNATA House</b></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="tab__pane" id="pane-map" role="tabpanel" data-pane="map" hidden>
-          <!-- The Google embed is 1.9 MB of script and is lazy loaded by
-               [data-map] in main.js. There must only ever be ONE [data-map] on
-               the page. Because this pane starts hidden it has no intersection
-               box, so the embed is not fetched until the tab is actually
-               opened, which is better than it was.
-
-               ll with no q returns the map WITHOUT Google's own pin and without
-               the info card, centred exactly on the venue. That is what lets
-               the pin below be the only marker: it sits outside the iframe, so
-               the grayscale filter never touches it. -->
-          <div class="venue__map venue__map--tab">
-            <div class="venue__frame" data-map
-                 data-src="https://maps.google.com/maps?ll=40.4341856,-3.6846612&amp;z=16&amp;output=embed">
-              <span class="venue__map-wait">Map</span>
-            </div>
-            <svg class="pin" viewBox="0 0 28 38" aria-hidden="true">
-              <path d="M14 37C14 37 26 22.7 26 14A12 12 0 1 0 2 14c0 8.7 12 23 12 23Z"/>
-              <circle cx="14" cy="14" r="4.4"/>
-            </svg>
-          </div>
-          <h3 class="venue__name">Frecuencia</h3>
-          <p class="venue__addr">Calle de Lagasca 103<br>Salamanca, 28006 Madrid</p>
-          <ul class="rows">
-            <li><span>Metro</span><b>Núñez de Balboa</b></li>
-            <li><span>Doors</span><b>23:59</b></li>
-            <li><span>Age</span><b>18+</b></li>
-          </ul>
-          <!-- Google's documented Maps URL API, not a copied share link. A share
-               link opened Maps with an EMPTY search bar and a blank card: its
-               ftid was 15 hex digits where Google's are 16, so the data blob
-               was dropped. Do not paste a share URL back in here. -->
-          <a class="btn btn--ghost btn--wide"
-             href="https://www.google.com/maps/search/?api=1&amp;query=Frecuencia%2C%20Calle%20de%20Lagasca%20103%2C%2028006%20Madrid"
-             target="_blank" rel="noopener">Open in Google Maps</a>
-        </div>
-      </div>
-
       <!-- Patt cannot be framed. Their headers say yes (ALLOWALL,
            frame-ancestors *) but the app itself bounces out of a frame to
            events.patt.club/, which then refuses with X-Frame-Options:
@@ -242,6 +155,92 @@ alt=""></noscript>
           <a class="btn btn--wide" data-buy
              href="https://events.patt.club/pass/6aa3105af7a2f83ab69c4620?handle=Komnata&amp;utm_source=site&amp;utm_medium=web"
              target="_blank" rel="noopener">Buy tickets on Patt</a>
+        </div>
+      </div>
+
+      <div class="ticket__side">
+        <nav class="tabs" data-tabs role="tablist" aria-label="About the night">
+          <button class="tabs__btn is-on" type="button" role="tab"
+                  data-tab="summary" aria-selected="true" aria-controls="pane-summary">Summary</button>
+          <button class="tabs__btn" type="button" role="tab"
+                  data-tab="music" aria-selected="false" aria-controls="pane-music">Music</button>
+          <button class="tabs__btn" type="button" role="tab"
+                  data-tab="map" aria-selected="false" aria-controls="pane-map">Map</button>
+        </nav>
+
+        <div class="tab__stack">
+          <div class="tab__pane is-on" id="pane-summary" role="tabpanel" data-pane="summary">
+            <!-- The edition concept, as the club wrote it on the ticket page -->
+            <p class="ticket__concept">
+              No photographer tonight. Five or six disposable cameras go round the bar,
+              shooting everything: flash in your face, blur, grain, someone's back.
+              The whole roll gets developed, nothing edited out.
+            </p>
+            <p class="ticket__concept ticket__concept--last">
+              KØMNATA used to be photographed for you. Now you are the one shooting it.
+            </p>
+            <ul class="rows">
+              <li><span>Date</span><b>Fri 25 Sep 2026</b></li>
+              <li><span>Doors</span><b>23:59</b></li>
+              <li><span>Line-up</span><b>Milasmol · IlyazZz</b></li>
+              <li><span>Venue</span><b>Frecuencia, Madrid</b></li>
+            </ul>
+          </div>
+
+          <div class="tab__pane" id="pane-music" role="tabpanel" data-pane="music">
+            <div class="setlist">
+              <div class="setlist__side">
+                <div class="setlist__disc" data-vinyl
+                     data-cover="assets/img/playlists/komnata-house.webp"
+                     data-title="KØMNATA House"
+                     data-turn="13"
+                     style="--v-size:min(168px,40vw);--v-label:30%"></div>
+                <a class="record__link" href="https://open.spotify.com/playlist/01tNS52DVOTu4OtBuNrsLk"
+                   target="_blank" rel="noopener">Open on Spotify</a>
+              </div>
+              <div class="setlist__meta">
+                <p class="ticket__concept">
+                  Milasmol and IlyazZz on the decks. The room's own record is here:
+                  play it before you come and you already know the night.
+                </p>
+                <ul class="rows">
+                  <li><span>On the decks</span><b>Milasmol · IlyazZz</b></li>
+                  <li><span>Record</span><b>KØMNATA House</b></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab__pane" id="pane-map" role="tabpanel" data-pane="map">
+            <!-- The Google embed is 1.9 MB of script. It is NOT created until
+                 this tab is first opened: these panes stay in the layout so the
+                 frame keeps its height, so an IntersectionObserver would see it
+                 straight away and fetch it on page load. main.js builds the
+                 iframe from data-src on the first Map click instead. -->
+            <div class="venue__map venue__map--tab">
+              <div class="venue__frame" data-map
+                   data-src="https://maps.google.com/maps?ll=40.4341856,-3.6846612&amp;z=16&amp;output=embed">
+                <span class="venue__map-wait">Map</span>
+              </div>
+              <svg class="pin" viewBox="0 0 28 38" aria-hidden="true">
+                <path d="M14 37C14 37 26 22.7 26 14A12 12 0 1 0 2 14c0 8.7 12 23 12 23Z"/>
+                <circle cx="14" cy="14" r="4.4"/>
+              </svg>
+            </div>
+            <h3 class="venue__name">Frecuencia <span class="badge">18+</span></h3>
+            <p class="venue__addr">Calle de Lagasca 103<br>Salamanca, 28006 Madrid</p>
+            <ul class="rows">
+              <li><span>Metro</span><b>Núñez de Balboa</b></li>
+              <li><span>Doors</span><b>23:59</b></li>
+            </ul>
+            <!-- Google's documented Maps URL API, not a copied share link. A
+                 share link opened Maps with an EMPTY search bar and a blank
+                 card: its ftid was 15 hex digits where Google's are 16, so the
+                 data blob was dropped. Do not paste a share URL back in here. -->
+            <a class="btn btn--ghost btn--wide"
+               href="https://www.google.com/maps/search/?api=1&amp;query=Frecuencia%2C%20Calle%20de%20Lagasca%20103%2C%2028006%20Madrid"
+               target="_blank" rel="noopener">Open in Google Maps</a>
+          </div>
         </div>
       </div>
     </div>
@@ -568,6 +567,6 @@ alt=""></noscript>
 <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
 <script src="components/vinyl-player/vinyl-player.js?v=2" defer></script>
 <script src="components/backdrop/backdrop.js?v=13" defer></script>
-<script src="js/main.js?v=43" defer></script>
+<script src="js/main.js?v=44" defer></script>
 </body>
 </html>

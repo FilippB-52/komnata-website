@@ -155,8 +155,7 @@
      Instagram frame means it fires at scroll zero and puts 3.5 MB in front of
      the hero. It gets a short lead instead. The map is far enough down that a
      full screen of warning costs nothing. */
-  [['[data-map]', 'Map to the venue', '100% 0px'],
-   ['[data-tg]', 'KØMNATA on Telegram', '25% 0px'],
+  [['[data-tg]', 'KØMNATA on Telegram', '25% 0px'],
    ['[data-ig]', 'KØMNATA on Instagram', '25% 0px']].forEach(function (pair) {
     var box = document.querySelector(pair[0]);
     if (!box) return;
@@ -421,9 +420,27 @@
       });
       panes.forEach(function (p) {
         var on = p.getAttribute('data-pane') === want;
-        p.hidden = !on;
         p.classList.toggle('is-on', on);
+        /* not [hidden]: these stay in the grid so the frame keeps its height.
+           aria-hidden is what tells a screen reader which one is live. */
+        p.setAttribute('aria-hidden', on ? 'false' : 'true');
       });
+      /* The map is built on the first Map click, not by an observer: the pane
+         is always laid out now, so an observer would fetch 1.9 MB of Google on
+         page load. */
+      if (want === 'map') {
+        var box = document.querySelector('[data-map]');
+        if (box && !box.dataset.loaded) {
+          box.dataset.loaded = '1';
+          var f = document.createElement('iframe');
+          f.title = 'Map to the venue';
+          f.referrerPolicy = 'no-referrer-when-downgrade';
+          f.loading = 'lazy';
+          f.scrolling = 'no';
+          f.src = box.dataset.src;
+          box.appendChild(f);
+        }
+      }
       /* The vinyl in the Music pane and the map in the Map pane both size
          themselves from a box that was display:none until now, so anything
          measured while hidden is wrong. Nudge the listeners that care. */
