@@ -35,8 +35,8 @@ Where it lives now:
 ## Three ways to go
 
 **Route A. Leave it where it is and just point the domain.** Half an hour,
-nothing moves, Horizon Symmetry keeps paying for hosting (it is on a free
-tier). Best if the night is close and nobody wants to touch anything.
+nothing moves, and the hosting costs you nothing where it is. Best if the
+night is close.
 
 **Route B. KØMNATA takes over the hosting, Horizon Symmetry keeps the code.**
 The project moves to a KØMNATA Vercel account. They control the domain, the
