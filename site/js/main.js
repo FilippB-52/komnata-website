@@ -130,6 +130,7 @@
       f.scrolling = 'no';
       f.src = box.dataset.src;
       box.appendChild(f);
+      if (box.hasAttribute('data-ig')) fitIg();   // hoisted, declared below
     };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries, obs) {
@@ -138,6 +139,101 @@
       }, { rootMargin: pair[2] }).observe(box);
     } else { load(); }
   });
+
+  /* --- INSTAGRAM FIT ----------------------------------------------------- */
+  /* On a phone the social cards sit two up, so the Instagram slot is about
+     140px wide. Instagram's embed will not lay out below roughly 320px, so it
+     is rendered at its own width and scaled down. The numbers are resolved in
+     px here and handed to CSS, because a transform cannot do arithmetic on a
+     clamp() and the slot width is a clamp all the way up. */
+  var IG_RENDER = 340;
+  var phone = window.matchMedia('(max-width: 760px)');
+
+  function fitIg() {
+    var slot = document.querySelector('[data-ig]');
+    if (!slot || !slot.querySelector('iframe')) return;
+    if (!phone.matches) {
+      slot.style.removeProperty('--ig-w');
+      slot.style.removeProperty('--ig-h');
+      slot.style.removeProperty('--ig-scale');
+      return;
+    }
+    var r = slot.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    var scale = r.width / IG_RENDER;
+    slot.style.setProperty('--ig-w', IG_RENDER + 'px');
+    slot.style.setProperty('--ig-h', Math.round(r.height / scale) + 'px');
+    slot.style.setProperty('--ig-scale', scale.toFixed(4));
+  }
+
+  /* --- RECORD DECK ------------------------------------------------------- */
+  /* Below 980px the three records are one snap rail. The arrows do nothing
+     the finger cannot already do, they just make it visible that there is
+     more than one record, which a silent snap rail never does. */
+  (function () {
+    var deck = document.querySelector('[data-deck]');
+    if (!deck) return;
+    var rail  = deck.querySelector('[data-deck-rail]');
+    var prev  = deck.querySelector('[data-deck-prev]');
+    var next  = deck.querySelector('[data-deck-next]');
+    var dotbox = deck.querySelector('[data-deck-dots]');
+    var cards = [].slice.call(rail.querySelectorAll('.record'));
+    if (!rail || cards.length < 2) return;
+
+    for (var i = 0; i < cards.length; i++) dotbox.appendChild(document.createElement('i'));
+    var dots = dotbox.children;
+
+    function index() {
+      // nearest card centre to the rail centre, which is what snap lands on
+      var mid = rail.scrollLeft + rail.clientWidth / 2;
+      var best = 0, bestD = Infinity;
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i].offsetLeft + cards[i].offsetWidth / 2;
+        var d = Math.abs(c - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
+    }
+
+    function sync() {
+      var i = index();
+      for (var k = 0; k < dots.length; k++) dots[k].className = k === i ? 'is-on' : '';
+      prev.disabled = i === 0;
+      next.disabled = i === cards.length - 1;
+    }
+
+    function go(dir) {
+      var i = Math.min(cards.length - 1, Math.max(0, index() + dir));
+      rail.scrollTo({
+        left: cards[i].offsetLeft - (rail.clientWidth - cards[i].offsetWidth) / 2,
+        behavior: 'smooth'
+      });
+    }
+    prev.addEventListener('click', function () { go(-1); });
+    next.addEventListener('click', function () { go(1); });
+
+    var tick = 0;
+    rail.addEventListener('scroll', function () {
+      cancelAnimationFrame(tick);
+      tick = requestAnimationFrame(sync);
+    }, { passive: true });
+
+    /* Arrow placement is pure CSS: the card padding and the vinyl size are
+       both known there, so nothing here has to measure a box that is still
+       settling. Only the dots and the Instagram scale need JS. */
+    function relayout() { sync(); fitIg(); }
+    relayout();
+    window.addEventListener('resize', relayout);
+    window.addEventListener('orientationchange', relayout);
+    window.addEventListener('load', relayout);
+
+    if ('ResizeObserver' in window) {
+      var slot = document.querySelector('[data-ig]');
+      if (slot) new ResizeObserver(function () { fitIg(); }).observe(slot);
+    } else {
+      setTimeout(relayout, 600);
+    }
+  })();
 
   if (reduce) return;
 
@@ -158,13 +254,18 @@
     /* Rendering is switched by scroll POSITION, never by reading the animated
        opacity: that value is scrubbed with an 0.8s lag, so sampling it inside
        a scroll handler raced the scrub and left the layer frozen at the Music
-       section. This trigger is simply active from the moment Social appears
-       until the end of the page, which is exactly when the layer is on. */
+       section.
+
+       No end and no onToggle here. A trigger ending at 'max' is active for
+       start <= scroll < end, so landing on the very last pixel of the page
+       toggled it OFF while the layer was still at opacity .3: the bands sat
+       visible and frozen at the footer. Measured on both layouts before the
+       change. onEnter/onLeaveBack has no far edge to fall off, so the layer
+       runs from the moment Social appears until you scroll back above it. */
     ScrollTrigger.create({
-      trigger: '#social', start: 'top bottom', end: 'max',
-      onToggle: function (self) {
-        if (window.KomnataBeams) window.KomnataBeams.setVisible(self.isActive);
-      }
+      trigger: '#social', start: 'top bottom',
+      onEnter:      function () { if (window.KomnataBeams) window.KomnataBeams.setVisible(true); },
+      onLeaveBack:  function () { if (window.KomnataBeams) window.KomnataBeams.setVisible(false); }
     });
     ScrollTrigger.create({
       start: 0, end: 'max',

@@ -229,7 +229,6 @@ a{color:inherit;text-decoration:none;}
   transition:color .25s ease,border-color .25s ease;
 }
 .card:hover .card__go{color:var(--bone);border-color:var(--bone);}
-@media (max-width:880px){.cards{grid-template-columns:1fr;}}
 
 /* --- Ø3  MUSIC ---------------------------------------------------------- */
 .music{padding-block:var(--bay);}
@@ -251,9 +250,56 @@ a{color:inherit;text-decoration:none;}
 }
 .record__link:hover{color:var(--bone);border-color:var(--bone);}
 .record__link--soon{color:var(--mute-2);border-color:transparent;cursor:default;}
+/* The deck wrapper is inert on desktop: no positioning context is needed
+   until the arrows exist, and the arrows only exist below 980px. */
+.deck__arr,.deck__dots{display:none;}
+
 @media (max-width:980px){
-  .records{grid-template-columns:1fr;max-width:460px;margin-inline:auto;}
+  /* The old one-column rule capped the records at 460px and centred them.
+     Keep that: without it a tablet gets a 750px wide card around a 300px
+     vinyl. Below the phone gutter the cap never binds, so this is inert there. */
+  .deck{position:relative;max-width:460px;margin-inline:auto;}
+  .records{
+    display:flex;gap:clamp(12px,3vw,20px);
+    overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;max-width:none;margin-inline:0;
+    /* the rail is scrolled by the arrows and by the finger, so it must take
+       pointer input even though the vinyl inside it does not */
+    padding-bottom:2px;
+  }
+  .records::-webkit-scrollbar{display:none;}
+  .record{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;}
   .record [data-vinyl]{--v-size:min(300px,64vw);}
+
+  /* Beside the vinyl, not beside the card, which is far taller than the
+     artwork. Both numbers are already in this stylesheet, so this is plain
+     arithmetic rather than a measurement: the card's own padding-top, plus
+     half the vinyl. Measuring it in JS raced the vinyl's own sizing and left
+     the arrows 26px low, because the first reading caught it at 300px.
+     64vw of vinyl in a full width card leaves ~50px a side, so 44px clears. */
+  .deck__arr{
+    display:grid;place-items:center;
+    position:absolute;left:0;
+    top:calc(clamp(26px,2.6vw,38px) + min(300px,64vw) / 2);translate:0 -50%;
+    width:44px;height:44px;padding:0;border-radius:50%;
+    background:rgba(11,12,13,.8);border:1px solid var(--line-2);
+    color:var(--bone);z-index:3;cursor:pointer;
+    transition:opacity .25s ease,border-color .25s ease;
+  }
+  .deck__arr--next{left:auto;right:0;}
+  .deck__arr svg{
+    width:18px;height:18px;fill:none;stroke:currentColor;
+    stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  }
+  .deck__arr[disabled]{opacity:.25;cursor:default;}
+
+  .deck__dots{display:flex;justify-content:center;gap:7px;margin-top:18px;}
+  .deck__dots i{
+    width:6px;height:6px;border-radius:50%;background:var(--line-2);
+    transition:background .25s ease,transform .25s ease;
+  }
+  .deck__dots i.is-on{background:var(--bone);transform:scale(1.25);}
 }
 
 /* --- Ø4  GALLERY -------------------------------------------------------- */
@@ -400,6 +446,92 @@ a{color:inherit;text-decoration:none;}
   .hero__mark{width:min(78vw,340px);}
   .hero .pills{gap:6px;}
   .pills li{font-size:12px;padding:7px 14px;}
+}
+
+/* --- PHONE LAYOUT ------------------------------------------------------- */
+/* Everything below is phone only and additive: no rule here exists above
+   760px, so the desktop layout is untouched by all of it. The brief was that
+   the page reads as one big block after another on a phone, so the moves are
+   all the same move: less air between sections, and panels that belong
+   together share one frame instead of stacking as separate cards. */
+@media (max-width:760px){
+
+  /* 88px top AND bottom on every section is 176px of nothing between them on
+     a 844px screen. This is the single biggest reason the page felt oversized. */
+  :root{--bay:clamp(56px,14vw,72px);}
+
+  /* --- SOCIAL: two up, and much shorter ---------------------------------- */
+  /* Side by side on the phone too. The sentence under each name goes, the
+     handle stays: at 165px of card width the sentence wrapped to five lines
+     and the handle is the only part anyone needs. */
+  .cards{gap:10px;}
+  .card{padding:14px;border-radius:18px;}
+  .chip{width:34px;height:34px;margin-bottom:12px;}
+  .chip svg{width:17px;height:17px;}
+  .card__name{font-size:15px;}
+  .card__note{margin-top:5px;}
+  .card__desc{display:none;}
+  .card__handle{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+    color:var(--mute-2);
+  }
+  /* Square, not 3:4. Instagram's embed is a header plus a 3-up grid: at 340px
+     of render width that is ~320px tall, so a 3:4 slot left a band of bare
+     white under the last row. A square slot is ~340px of render height at the
+     same scale, which lands on the bottom of the second row. */
+  .card__slot{margin-top:12px;min-height:0;aspect-ratio:1;border-radius:12px;}
+  .card__slot--mark{gap:10px;}
+  .card__slot--mark img{width:42px;height:42px;}
+  .card__slot--mark span{font-size:9px;letter-spacing:.12em;}
+  .card__go{margin-top:12px;font-size:12px;}
+
+  /* Instagram's embed has a minimum sensible width, well above the ~140px of
+     slot it now gets. So it is rendered at its own width and scaled down to
+     fit. --ig-w/--ig-h/--ig-scale are resolved px written by main.js from the
+     measured slot, never a clamp(), because a transform cannot read one. */
+  .card__slot--light iframe{
+    position:absolute;top:0;left:0;
+    width:var(--ig-w,100%);height:var(--ig-h,100%);min-height:0;
+    transform-origin:top left;transform:scale(var(--ig-scale,1));
+  }
+
+  /* --- NIGHTS: bigger tiles ---------------------------------------------- */
+  /* 150px squares on a 390px screen read as thumbnails. 52vw is ~203px. */
+  .shot{height:clamp(190px,52vw,232px);}
+
+  /* --- FIND US: one frame, not two blocks -------------------------------- */
+  /* The grid itself becomes the card. The map is a band across the top of it
+     rather than a panel of its own underneath, so the map, the address, the
+     rows and the button read as one object. The pin is centred on the frame,
+     so shortening the map keeps it on the venue. */
+  .venue__grid{
+    gap:0;background:var(--raised);border-radius:var(--r);overflow:hidden;
+  }
+  .venue__map{
+    order:-1;min-height:0;height:168px;border-radius:0;background:var(--raised-2);
+  }
+  .venue__card{background:none;padding:20px;}
+  .venue__card:hover{background:none;}
+  .venue__name{font-size:23px;}
+  .venue__addr{margin-top:8px;font-size:14px;}
+  .venue__grid .rows{padding-top:14px;}
+  .venue__grid .rows li{padding:11px 0;font-size:13.5px;}
+  .venue__card .btn{margin-top:18px;}
+
+  /* --- NEXT NIGHT: no frame above the countdown -------------------------- */
+  /* The concept was in a card of its own stacked on top of the ticket card,
+     which is the block-on-block the brief objected to. On a phone it becomes
+     plain copy under the heading and the countdown card follows it directly.
+     The rows go: the lede above already gives date, doors and venue, and the
+     poster carries the line-up, so every row was a duplicate here. */
+  .ticket{gap:22px;}
+  .ticket__side{background:none;padding:0;}
+  .ticket__side:hover{background:none;}
+  .ticket__side .rows{display:none;}
+  .ticket__concept{font-size:15px;line-height:1.7;max-width:none;}
+  .ticket__concept--last{margin-top:12px;}
+  .ticket__foot{padding:18px;}
+  .count{margin:12px 0 18px;}
 }
 
 /* --- TOUCH TARGETS ------------------------------------------------------ */

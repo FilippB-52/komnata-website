@@ -30,6 +30,8 @@
     beamLength: 50,      // becomes the horizontal run once tilted
     segments: 60,
     speed: 2,
+    drift: 0.13,         // how fast the noise scrolls. was 0.10, nudged up ~30% on
+                         // request: perceptibly faster, still a drift and not a flow
     noiseIntensity: 1.75,
     scale: 0.2,
     light: '#8DEEED',    // brand cyan. '#EFECE6' for bone, '#ffffff' for plain white
@@ -240,7 +242,7 @@
     last = now;
     var d = clock.getDelta();
     for (var i = 0; i < fields.length; i++) {
-      fields[i].mat.uniforms.time.value += 0.1 * d;
+      fields[i].mat.uniforms.time.value += CFG.drift * d;
     }
     renderer.render(scene, camera);
   }

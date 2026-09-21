@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=23">
+<link rel="stylesheet" href="css/style.css?v=29">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 </head>
@@ -104,7 +104,7 @@
           </svg>
         </span>
         <h3 class="card__name">Telegram</h3>
-        <p class="card__note">@itskomnataa. Dates, drops and access land here first.</p>
+        <p class="card__note"><span class="card__handle">@itskomnataa</span><span class="card__desc">Dates, drops and access land here first.</span></p>
         <!-- Telegram's own post widget renders an empty stub for this channel:
              every post embed returns "Please open Telegram to view this post"
              and t.me/s/itskomnataa redirects away instead of showing the web
@@ -130,7 +130,7 @@
           </svg>
         </span>
         <h3 class="card__name">Instagram</h3>
-        <p class="card__note">@itskomnata. The room, the crowd, the recaps.</p>
+        <p class="card__note"><span class="card__handle">@itskomnata</span><span class="card__desc">The room, the crowd, the recaps.</span></p>
         <!-- Instagram's own profile embed. It is the only free endpoint that
              still shows a whole grid, it needs no token, and it updates itself.
              It only renders on white, which is why it sits on its own panel. -->
@@ -151,7 +151,12 @@
       <p class="lede lede--sm">Three records. Play them before you come and you already know the night.</p>
     </div>
 
-    <div class="records">
+    <!-- On a phone the three records stack to roughly three full screens, so
+         there they become one swipeable deck instead: scroll-snap does the
+         moving, the arrows are just buttons that scroll it, and the whole
+         thing collapses back to the three-up grid above 980px. -->
+    <div class="deck" data-deck>
+      <div class="records" data-deck-rail>
       <!-- --v-art 50% 34% was picked by eye against 18 / 50 / 76 on this
            portrait cover. Do not change it without looking at it rendered.
            The other two have no cover yet and fall back to the drawn KØMNATA
@@ -184,6 +189,15 @@
         <p class="record__note">Five in the morning, still going.</p>
         <span class="record__link record__link--soon">Coming soon</span>
       </article>
+      </div>
+
+      <button class="deck__arr deck__arr--prev" type="button" data-deck-prev aria-label="Previous record">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+      </button>
+      <button class="deck__arr deck__arr--next" type="button" data-deck-next aria-label="Next record">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+      </button>
+      <div class="deck__dots" data-deck-dots aria-hidden="true"></div>
     </div>
   </div>
 </section>
@@ -378,7 +392,7 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
 <script src="components/vinyl-player/vinyl-player.js?v=2" defer></script>
-<script src="components/beams/beams.js?v=4" defer></script>
-<script src="js/main.js?v=24" defer></script>
+<script src="components/beams/beams.js?v=5" defer></script>
+<script src="js/main.js?v=27" defer></script>
 </body>
 </html>
