@@ -266,9 +266,22 @@
        instead: opacity on a composited layer is free, turning the light down
        in the shader is not, and this is the one number to change if it wants
        to be stronger or weaker. */
+    /* Opacity .37, up from .30 on request.
+
+       The ramp now starts at 'top bottom' instead of 'top 45%'. That matters
+       more than the number: at 'top 45%' the layer was still at zero opacity
+       at the exact moment the hero's bottom edge crossed the middle of the
+       screen, so the page went textured video -> half a screen of dead flat
+       #0B0C0D -> teal. Measured: pixel stddev fell from 1.8 inside the hero
+       to 0.0 for ~500px below it. That flat band is what read as a hard cut,
+       not any brightness step at the seam, which measures 5/765.
+
+       Starting at 'top bottom' costs nothing during the hero, because .beams
+       is z-index:-1 and the hero video paints over it. By the time the video
+       is gone the teal is already ~0.16 and rising, so there is no gap. */
     gsap.fromTo(beams, { opacity: 0 }, {
-      opacity: .30, ease: 'none',
-      scrollTrigger: { trigger: '#social', start: 'top 45%', end: 'bottom 55%', scrub: .8 }
+      opacity: .37, ease: 'none',
+      scrollTrigger: { trigger: '#social', start: 'top bottom', end: 'bottom 55%', scrub: .8 }
     });
     /* Rendering is switched by scroll POSITION, never by reading the animated
        opacity: that value is scrubbed with an 0.8s lag, so sampling it inside

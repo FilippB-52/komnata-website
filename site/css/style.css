@@ -198,7 +198,16 @@ a{color:inherit;text-decoration:none;}
 }
 .hero__scrim{
   position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(11,12,13,.42) 0%,rgba(11,12,13,.10) 38%,rgba(11,12,13,.82) 100%);
+  /* The last stop used to be .82, which left 18% of the video still live right
+     up to the hero's bottom edge, so the grain stopped dead on a line. The
+     curve through 88% is unchanged; the final 12% closes to solid so the video
+     has dissolved into the page colour before the edge and there is no texture
+     boundary to see. */
+  background:linear-gradient(180deg,
+    rgba(11,12,13,.42) 0%,
+    rgba(11,12,13,.10) 38%,
+    rgba(11,12,13,.82) 88%,
+    rgba(11,12,13,1) 100%);
 }
 .hero__inner{
   position:relative;display:flex;flex-direction:column;align-items:center;
