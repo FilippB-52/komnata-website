@@ -591,14 +591,23 @@ a{color:inherit;text-decoration:none;}
   .tab__pane{transition:none;}
 }
 
-/* The music pane: the record beside its details, stacking on a phone. The
-   link sits under the RECORD, not under the table, because it opens the record
-   and belongs to it. */
-.setlist{display:flex;gap:clamp(20px,2.6vw,34px);align-items:flex-start;}
-.setlist__side{flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;}
+/* The music pane: the record beside its details, stacking on a phone. The link
+   sits under the RECORD, not under the table, because it opens the record.
+
+   The record is big here on purpose. Every pane shares one grid cell so the
+   stack is as tall as the tallest, which is Map, and Music only reached 239px
+   of 434: 195px of dead air under it. A bigger record takes most of that, and
+   centring the block spreads what is left above and below instead of leaving
+   it all in a hole at the bottom. */
+.setlist{
+  display:flex;gap:clamp(24px,3vw,44px);align-items:center;
+  height:100%;
+}
+.setlist__side{flex:none;display:flex;flex-direction:column;align-items:center;gap:20px;}
 .setlist__side .record__link{display:inline-block;}
+.setlist__side [data-vinyl]{--v-size:min(300px,30vw);}
 .setlist__meta{min-width:0;}
-.setlist__meta .rows{margin-top:22px;}
+.setlist__meta .rows{margin-top:24px;}
 
 /* The map pane. A strip rather than a panel: at 300px tall it made the left
    frame 841px on Map against 438px on Music, a 403px jump between two buttons
@@ -646,7 +655,10 @@ a{color:inherit;text-decoration:none;}
   .tabs{gap:5px;padding-bottom:12px;margin-bottom:20px;}
   /* 44px tall, like every other control on a phone */
   .tabs__btn{font-size:12px;padding:13px 14px;flex:1;}
-  .setlist{flex-direction:column;align-items:center;text-align:center;}
+  .setlist{flex-direction:column;align-items:center;text-align:center;height:auto;}
+  /* the phone pane is already the tallest of the three, so the record stays
+     small there: making it bigger would just grow the frame for all of them */
+  .setlist__side [data-vinyl]{--v-size:min(168px,42vw);}
   .venue__map--tab{height:104px;}
 }
 
