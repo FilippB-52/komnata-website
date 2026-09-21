@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=30">
+<link rel="stylesheet" href="css/style.css?v=31">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 </head>
@@ -91,7 +91,7 @@
 <section class="social" id="social">
   <div class="shell">
     <div class="head">
-      <h2 class="h2" data-reveal>Our channels</h2>
+      <h2 class="h2 h2--art" data-reveal><img src="assets/img/headings/our-channels.webp" alt="Our channels" width="1122" height="118" loading="lazy" decoding="async" fetchpriority="low"></h2>
       <p class="lede lede--sm">Dates, table drops and guest list open on Telegram before anywhere else.</p>
     </div>
 
@@ -147,7 +147,7 @@
 <section class="music" id="music">
   <div class="shell">
     <div class="head">
-      <h2 class="h2" data-reveal>What we play</h2>
+      <h2 class="h2 h2--art" data-reveal><img src="assets/img/headings/what-we-play.webp" alt="What we play" width="1100" height="117" loading="lazy" decoding="async" fetchpriority="low"></h2>
       <p class="lede lede--sm">Three records. Play them before you come and you already know the night.</p>
     </div>
 
@@ -174,12 +174,21 @@
            target="_blank" rel="noopener">Open on Spotify</a>
       </article>
 
-      <!-- SWAP: playlist two. Add data-cover + href when the link arrives. -->
+      <!-- Cover and name taken from the playlist itself via Spotify's oEmbed
+           endpoint, which needs no key: open.spotify.com/oembed?url=<playlist>.
+           That returns a 300px thumbnail; the 640px variant is the same path
+           with the ab67706c0000bebb prefix, which is what is saved here.
+           The share link's ?si= and ?pt= tracking params are stripped. -->
       <article class="record">
-        <div data-vinyl data-title="The main room" data-turn="13"></div>
-        <h3 class="record__name">The main room</h3>
+        <div data-vinyl
+             data-cover="assets/img/playlists/komnata-house.webp"
+             data-title="KØMNATA house"
+             data-turn="13"
+             style="--v-label:30%"></div>
+        <h3 class="record__name">KØMNATA house</h3>
         <p class="record__note">What the whole floor already knows.</p>
-        <span class="record__link record__link--soon">Coming soon</span>
+        <a class="record__link" href="https://open.spotify.com/playlist/01tNS52DVOTu4OtBuNrsLk"
+           target="_blank" rel="noopener">Open on Spotify</a>
       </article>
 
       <!-- SWAP: playlist three. Add data-cover + href when the link arrives. -->
@@ -207,7 +216,7 @@
 <section class="gallery" id="gallery">
   <div class="shell">
     <div class="head">
-      <h2 class="h2" data-reveal>Nights we already had</h2>
+      <h2 class="h2 h2--art h2--art-2" data-reveal><img src="assets/img/headings/nights-we-already-had.webp" alt="Nights we already had" width="1040" height="307" loading="lazy" decoding="async" fetchpriority="low"></h2>
       <p class="lede lede--sm">Six editions, one room at a time.</p>
     </div>
   </div>
@@ -277,7 +286,7 @@
 <section class="venue" id="map">
   <div class="shell">
     <div class="head">
-      <h2 class="h2" data-reveal>Find us</h2>
+      <h2 class="h2 h2--art" data-reveal><img src="assets/img/headings/find-us.webp" alt="Find us" width="582" height="118" loading="lazy" decoding="async" fetchpriority="low"></h2>
     </div>
 
     <div class="venue__grid">
@@ -323,7 +332,7 @@
 <section class="close" id="tickets">
   <div class="shell">
     <div class="head">
-      <h2 class="h2" data-reveal>Next night</h2>
+      <h2 class="h2 h2--art" data-reveal><img src="assets/img/headings/next-night.webp" alt="Next night" width="869" height="116" loading="lazy" decoding="async" fetchpriority="low"></h2>
       <p class="lede lede--sm">Friday 25 September, doors 23:59, Frecuencia.</p>
     </div>
 
