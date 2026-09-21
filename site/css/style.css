@@ -44,13 +44,34 @@
 }
 
 *,*::before,*::after{box-sizing:border-box;}
-html{-webkit-text-size-adjust:100%;background:var(--night);}
+
+/* --- INPUT LOCKDOWN ----------------------------------------------------- */
+/* This page is a poster, not a document. No pinch zoom, no double-tap zoom,
+   no rubber band, no selecting the copy, no dragging an image out of it.
+
+   touch-action:manipulation removes double-tap zoom and nothing else: panning
+   on both axes survives, so the record rail still swipes. The effective value
+   is the intersection down the tree, so .vinyl__disc keeps its own
+   touch-action:none and its drag is untouched.
+
+   The meta tag carries maximum-scale=1 and user-scalable=no, which Android
+   honours. iOS Safari has ignored user-scalable since iOS 10, so the pinch is
+   stopped there by the gesture handlers in main.js instead. */
+html{
+  -webkit-text-size-adjust:100%;background:var(--night);
+  overscroll-behavior:none;
+  touch-action:manipulation;
+}
 body{
   margin:0;background:transparent;color:var(--bone);
   font-family:var(--sans);font-size:16px;line-height:1.7;font-weight:400;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   overflow-x:hidden;
+  overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;   /* no long-press menu on links or images */
 }
+img,svg,video,canvas{-webkit-user-drag:none;}
 img{max-width:100%;display:block;}
 a{color:inherit;text-decoration:none;}
 :focus-visible{outline:1px solid var(--bone);outline-offset:4px;}

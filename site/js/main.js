@@ -8,6 +8,25 @@
   'use strict';
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* --- INPUT LOCKDOWN ---------------------------------------------------- */
+  /* Deliberately above the gsap guard: if the CDN is blocked the page still
+     must not pinch, and everything below this point is skipped on that return.
+
+     iOS Safari has ignored user-scalable=no since iOS 10, so the meta tag does
+     not stop a pinch there. These three Safari-only gesture events are what
+     does. Non-passive, because calling preventDefault is the entire point.
+     Double-tap zoom is handled in CSS by touch-action:manipulation.
+
+     Nothing here touches a single-finger gesture, so scrolling, the record
+     rail swipe and the vinyl drag are all unaffected: gesture* only fires for
+     two fingers, and dragstart never fires for a tap or a scroll. */
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (type) {
+    document.addEventListener(type, function (e) { e.preventDefault(); }, { passive: false });
+  });
+  /* Catches Firefox and anything else that ignores -webkit-user-drag. */
+  document.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
   if (typeof gsap === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
 
