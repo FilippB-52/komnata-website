@@ -356,6 +356,54 @@
     });
   }
 
+  /* --- POPUP ------------------------------------------------------------- */
+  /* Up after 3s. Scroll is stopped while it is open, and Lenis has to be told
+     separately: it drives scrolling itself, so overflow:hidden alone leaves the
+     page still moving under the scrim. */
+  var pop = document.querySelector('[data-pop]');
+  if (pop) {
+    var popTimer = setTimeout(openPop, 3000);
+    var lastFocus = null;
+
+    function openPop() {
+      if (!pop.hidden) return;
+      pop.hidden = false;
+      pop.setAttribute('aria-hidden', 'false');
+      lastFocus = document.activeElement;
+      document.documentElement.classList.add('is-locked');
+      if (lenis) lenis.stop();
+      requestAnimationFrame(function () { pop.classList.add('is-on'); });
+      var x = pop.querySelector('.pop__x');
+      if (x) x.focus();
+    }
+
+    function closePop() {
+      clearTimeout(popTimer);
+      if (pop.hidden) return;
+      pop.classList.remove('is-on');
+      document.documentElement.classList.remove('is-locked');
+      if (lenis) lenis.start();
+      /* wait out the fade before pulling it from the layout, or it vanishes */
+      setTimeout(function () {
+        pop.hidden = true;
+        pop.setAttribute('aria-hidden', 'true');
+      }, reduce ? 0 : 450);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    pop.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-pop-close]')) closePop();
+    });
+    /* Buying is closing: the link opens Patt in a new tab, so leaving the
+       popup up behind it means they come back to a blocked page. */
+    pop.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-buy]')) setTimeout(closePop, 120);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closePop();
+    });
+  }
+
   /* --- TABS -------------------------------------------------------------- */
   /* The three panes in Next Night's left frame. [hidden] does the switching so
      a pane is genuinely out of the layout, not just transparent: that is what

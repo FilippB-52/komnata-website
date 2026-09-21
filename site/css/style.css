@@ -62,6 +62,9 @@ html{
   overscroll-behavior:none;
   touch-action:manipulation;
 }
+/* set while the popup is open. Lenis is stopped alongside it: this alone does
+   not hold the page, because Lenis moves it with a transform of its own. */
+html.is-locked{overflow:hidden;}
 body{
   margin:0;background:transparent;color:var(--bone);
   font-family:var(--sans);font-size:16px;line-height:1.7;font-weight:400;
@@ -435,14 +438,6 @@ a{color:inherit;text-decoration:none;}
 
 /* --- Ø5  MAP ------------------------------------------------------------ */
 .venue{padding-block:var(--bay);}
-.venue__grid{
-  display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);
-  gap:clamp(12px,1.5vw,20px);
-}
-.venue__card{
-  background:var(--raised);border-radius:var(--r);
-  padding:clamp(26px,2.6vw,38px);display:flex;flex-direction:column;
-}
 .venue__name{margin:0;font-size:clamp(24px,2.6vw,34px);font-weight:500;line-height:1.1;}
 .venue__addr{margin:14px 0 0;color:var(--mute);font-size:15px;}
 .rows{list-style:none;margin:auto 0 0;padding:28px 0 0;display:grid;gap:2px;}
@@ -452,10 +447,8 @@ a{color:inherit;text-decoration:none;}
 }
 .rows span{color:var(--mute-2);}
 .rows b{font-weight:400;}
-.venue__card .btn{margin-top:26px;}
 .venue__map{
-  position:relative;border-radius:var(--r);overflow:hidden;background:var(--raised);
-  min-height:clamp(340px,38vw,520px);
+  position:relative;border-radius:var(--r);overflow:hidden;background:var(--raised-2);
   /* Google's embed draws an "Open in Maps" chip in its top-left corner. The
      whole iframe is pointer-events:none, so that chip is dead: it looks like a
      button and does nothing. It cannot be removed from a cross-origin frame,
@@ -491,7 +484,6 @@ a{color:inherit;text-decoration:none;}
   font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--mute-2);
 }
-@media (max-width:880px){.venue__grid{grid-template-columns:1fr;}}
 
 /* --- TICKETS + FOOTER --------------------------------------------------- */
 .close{padding-block:var(--bay);}
@@ -570,20 +562,29 @@ a{color:inherit;text-decoration:none;}
 .tab__pane{animation:paneIn .35s ease both;}
 @keyframes paneIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-/* The music pane: the record beside its details, stacking on a phone. */
+/* The music pane: the record beside its details, stacking on a phone. The
+   link sits under the RECORD, not under the table, because it opens the record
+   and belongs to it. */
 .setlist{display:flex;gap:clamp(20px,2.6vw,34px);align-items:flex-start;}
-.setlist__disc{flex:none;}
+.setlist__side{flex:none;display:flex;flex-direction:column;align-items:center;gap:18px;}
+.setlist__side .record__link{display:inline-block;}
 .setlist__meta{min-width:0;}
 .setlist__meta .rows{margin-top:22px;}
-.setlist__meta .record__link{display:inline-block;margin-top:20px;}
 
-/* The map pane. Shorter than the old standalone section, because it now sits
-   inside a frame beside the ticket card rather than spanning the page. The
-   48px top crop and the pin offset come with it from .venue__map. */
+/* The map pane. A strip rather than a panel: at 300px tall it made the left
+   frame 841px on Map against 438px on Music, a 403px jump between two buttons
+   sitting side by side, which is what the brief objected to.
+
+   The 48px top crop that hides Google's dead "Open in Maps" chip stays, and it
+   is a FIXED pixel amount because the chip is fixed inside the iframe, so at
+   this height it is a large share of the box. That is what drives the numbers
+   below: the venue ends up at (height/2 - 24) from the top, so the pin is
+   shrunk to keep its point there without its head being clipped off. */
 .venue__map--tab{
-  min-height:0;height:clamp(230px,22vw,300px);
-  margin-bottom:clamp(22px,2.4vw,30px);
+  min-height:0;height:112px;
+  margin-bottom:clamp(20px,2.2vw,26px);
 }
+.venue__map--tab .pin{width:20px;height:27px;}
 .tab__pane .venue__name{font-size:clamp(22px,2.2vw,28px);}
 .tab__pane .venue__addr{margin-top:10px;}
 .tab__pane .rows{padding-top:22px;}
@@ -594,8 +595,70 @@ a{color:inherit;text-decoration:none;}
   /* 44px tall, like every other control on a phone */
   .tabs__btn{font-size:12px;padding:13px 14px;flex:1;}
   .setlist{flex-direction:column;align-items:center;text-align:center;}
-  .setlist__meta .record__link{margin-top:16px;}
-  .venue__map--tab{height:200px;}
+  .venue__map--tab{height:104px;}
+}
+
+/* --- POPUP --------------------------------------------------------------- */
+/* Opens 3s after load. Sits above the nav (z 60) and below nothing else. */
+.pop[hidden]{display:none;}
+.pop{
+  position:fixed;inset:0;z-index:90;
+  display:grid;place-items:center;padding:var(--gutter);
+}
+.pop__scrim{
+  position:absolute;inset:0;background:rgba(6,7,8,.72);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .4s ease;
+}
+.pop.is-on .pop__scrim{opacity:1;}
+.pop__card{
+  position:relative;width:min(420px,100%);
+  background:var(--raised);border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;
+  opacity:0;transform:translateY(14px) scale(.985);
+  transition:opacity .45s ease,transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.pop.is-on .pop__card{opacity:1;transform:none;}
+.pop__poster{width:100%;height:auto;aspect-ratio:1200/630;object-fit:cover;display:block;}
+.pop__body{padding:clamp(22px,2.4vw,30px);}
+.pop__eyebrow{
+  margin:0;font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute-2);
+}
+.pop__title{margin:10px 0 0;font-size:26px;font-weight:500;letter-spacing:.005em;}
+.pop__rows{padding-top:18px;}
+.pop__rows li{padding:11px 0;font-size:13.5px;}
+.pop__body .btn{margin-top:22px;}
+.pop__later{
+  display:block;width:100%;margin-top:14px;padding:10px 0;
+  appearance:none;background:none;border:0;cursor:pointer;
+  font:inherit;font-size:12.5px;color:var(--mute-2);
+  transition:color .25s ease;
+}
+.pop__later:hover{color:var(--mute);}
+
+/* The cross. 44px of target around a 14px mark, same rule as every other
+   control on a phone. */
+.pop__x{
+  position:absolute;top:12px;right:12px;z-index:2;
+  width:38px;height:38px;display:grid;place-items:center;
+  appearance:none;padding:0;cursor:pointer;border-radius:50%;
+  background:rgba(11,12,13,.66);border:1px solid var(--line-2);color:var(--bone);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  transition:background .25s ease,border-color .25s ease;
+}
+.pop__x::before{content:"";position:absolute;inset:-4px;border-radius:50%;}
+.pop__x:hover{background:rgba(11,12,13,.9);border-color:var(--bone);}
+.pop__x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;}
+
+@media (max-width:760px){
+  .pop{padding:16px;align-items:end;}
+  .pop__card{width:100%;}
+  .pop__title{font-size:23px;}
+  .pop__x{top:10px;right:10px;width:40px;height:40px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .pop__scrim,.pop__card{transition:none;}
 }
 
 /* --- MASKED LINES ------------------------------------------------------- */
@@ -666,24 +729,13 @@ a{color:inherit;text-decoration:none;}
   /* 150px squares on a 390px screen read as thumbnails. 52vw is ~203px. */
   .shot{height:clamp(190px,52vw,232px);}
 
-  /* --- FIND US: one frame, not two blocks -------------------------------- */
-  /* The grid itself becomes the card. The map is a band across the top of it
-     rather than a panel of its own underneath, so the map, the address, the
-     rows and the button read as one object. The pin is centred on the frame,
-     so shortening the map keeps it on the venue. */
-  .venue__grid{
-    gap:0;background:var(--raised);border-radius:var(--r);overflow:hidden;
-  }
-  .venue__map{
-    order:-1;min-height:0;height:168px;border-radius:0;background:var(--raised-2);
-  }
-  .venue__card{background:none;padding:20px;}
-  .venue__card:hover{background:none;}
-  .venue__name{font-size:23px;}
-  .venue__addr{margin-top:8px;font-size:14px;}
-  .venue__grid .rows{padding-top:14px;}
-  .venue__grid .rows li{padding:11px 0;font-size:13.5px;}
-  .venue__card .btn{margin-top:18px;}
+  /* The Find Us section's own phone rules used to live here. They went when
+     that section folded into the Map tab, and one of them mattered: it set
+     .venue__map to 168px and sat LATER in the file than .venue__map--tab, so
+     it silently won and the map strip stayed 168px on a phone instead of 104.
+     The two that are still needed are kept, scoped to the tab. */
+  .tab__pane .venue__name{font-size:23px;}
+  .tab__pane .venue__addr{margin-top:8px;font-size:14px;}
 
   /* --- NEXT NIGHT: no frame above the countdown -------------------------- */
   /* The concept was in a card of its own stacked on top of the ticket card,
@@ -694,7 +746,10 @@ a{color:inherit;text-decoration:none;}
   .ticket{gap:22px;}
   .ticket__side{background:none;padding:0;}
   .ticket__side:hover{background:none;}
-  .ticket__side .rows{display:none;}
+  /* The table used to be hidden here, because the line under the heading
+     already gave date, doors and venue. With tabs it goes back: the pane is
+     called Summary, and without it the pane was 246px against Music's 422,
+     which is the height jump between buttons the brief objected to. */
   .ticket__concept{font-size:15px;line-height:1.7;max-width:none;}
   .ticket__concept--last{margin-top:12px;}
   .ticket__foot{padding:18px;}
