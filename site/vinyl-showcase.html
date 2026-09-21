@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KØMNATA — vinyl player</title>
+<meta name="theme-color" content="#0B0C0D">
+
+<style>
+@font-face{
+  font-family:'Onest';
+  src:url('assets/fonts/Onest-VariableFont_wght.ttf') format('truetype');
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'JetBrains Mono';
+  src:url('assets/fonts/JetBrainsMono-VariableFont_wght.ttf') format('truetype');
+  font-weight:100 800;font-style:normal;font-display:swap;
+}
+
+:root{
+  --night:#0B0C0D;
+  --bone:#EFECE6;
+  --cyan:#8DEEED;
+  --cyan-deep:#256F6E;
+  --sans:'Onest',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;background:#000;color:var(--bone);
+  font-family:var(--sans);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* the same grain that carries the rest of the site, so the metal does not band */
+.grain{
+  position:fixed;inset:-120px;z-index:9;pointer-events:none;
+  opacity:.15;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+.hint{
+  position:fixed;left:0;right:0;bottom:26px;z-index:10;
+  text-align:center;pointer-events:none;
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(239,236,230,.24);
+}
+.hint b{font-weight:500;color:rgba(239,236,230,.5);}
+</style>
+
+<link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=1">
+</head>
+
+<body>
+
+<div data-vinyl
+     data-cover="assets/img/playlists/rus-komnata.jpg"
+     data-title="рус комната 7.000.000+"
+     data-turn="9"
+     style="--v-size:min(680px,84vmin);--v-label:30%;--v-art:50% 34%"></div>
+
+<div class="grain" aria-hidden="true"></div>
+<p class="hint"><b>Hold</b> the record to stop it and turn it &middot; let go and it picks up again</p>
+
+<script src="components/vinyl-player/vinyl-player.js?v=1"></script>
+</body>
+</html>

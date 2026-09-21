@@ -1,0 +1,222 @@
+/* ==========================================================================
+   KØMNATA — motion
+   Deliberately small. Lenis for scroll weight, ScrollTrigger for entrances
+   that fire once. Nothing runs per frame: no filters, no blend modes, no
+   cursor loop, no JS-driven marquee. That is what was making it crawl.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (typeof gsap === 'undefined') return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* --- SMOOTH SCROLL ---------------------------------------------------- */
+  var lenis = null;
+  if (!reduce && typeof Lenis !== 'undefined') {
+    lenis = new Lenis({
+      duration: 1.1,
+      easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      if (id.length < 2) return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      if (lenis) lenis.scrollTo(target, { duration: 1.1 });
+      else target.scrollIntoView();
+    });
+  });
+
+  /* --- NAV -------------------------------------------------------------- */
+  var nav = document.getElementById('nav');
+  ScrollTrigger.create({
+    start: 'top -50',
+    onUpdate: function (self) { nav.classList.toggle('is-stuck', self.scroll() > 50); }
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('[data-nav]'));
+  links.forEach(function (a) {
+    var section = document.getElementById(a.getAttribute('data-nav'));
+    if (!section) return;
+    ScrollTrigger.create({
+      trigger: section, start: 'top 45%', end: 'bottom 45%',
+      onToggle: function (self) {
+        if (!self.isActive) return;
+        links.forEach(function (l) { l.setAttribute('aria-current', l === a ? 'true' : 'false'); });
+      }
+    });
+  });
+
+  /* --- COUNTDOWN --------------------------------------------------------- */
+  /* Ticks to the door time in Madrid. The target carries its own +02:00
+     offset, so a phone set to any other timezone still counts to the right
+     moment. Stops itself once the doors open. */
+  var clock = document.querySelector('[data-countdown]');
+  if (clock) {
+    var target = new Date(clock.getAttribute('data-countdown')).getTime();
+    var cells = clock.querySelectorAll('b');
+    var tick = function () {
+      var left = target - Date.now();
+      if (left <= 0) {
+        clock.innerHTML = '<span>Tonight</span>';
+        clearInterval(timer);
+        return;
+      }
+      var s = Math.floor(left / 1000);
+      var parts = [Math.floor(s / 86400), Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60];
+      parts.forEach(function (n, i) {
+        var v = String(n).padStart(2, '0');
+        if (cells[i].textContent !== v) cells[i].textContent = v;
+      });
+    };
+    tick();
+    var timer = setInterval(tick, 1000);
+  }
+
+  /* --- THIRD PARTY FRAMES ------------------------------------------------ */
+  /* Google Maps is ~1.9 MB of script and Instagram's embed pulls ~3.5 MB of
+     its own. Neither is requested until its section is one screen away, so
+     the hero never competes with them. */
+  /* The gallery strip loads as one unit rather than tile by tile. Per-image
+     lazy loading fights a moving track: a tile can scroll into frame before
+     its own fetch has started and show up blank. */
+  var strip = document.querySelector('[data-strip]');
+  if (strip) {
+    var fillStrip = function () {
+      /* One file per animation frame rather than 22 in a single tick, so
+         decoding never lands on one frame. Measured cost here is nil either
+         way, it is cheap insurance for slower machines than this one. */
+      var queue = Array.prototype.slice.call(strip.querySelectorAll('img[data-src]'));
+      (function next() {
+        var img = queue.shift();
+        if (!img) return;
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        requestAnimationFrame(next);
+      })();
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries, obs) {
+        if (!entries[0].isIntersecting) return;
+        fillStrip(); obs.disconnect();
+      }, { rootMargin: '150% 0px' }).observe(strip);
+    } else { fillStrip(); }
+  }
+
+  /* Social sits one screen below the hero, so a generous margin on the
+     Instagram frame means it fires at scroll zero and puts 3.5 MB in front of
+     the hero. It gets a short lead instead. The map is far enough down that a
+     full screen of warning costs nothing. */
+  [['[data-map]', 'Map to the venue', '100% 0px'],
+   ['[data-ig]', 'KØMNATA on Instagram', '25% 0px']].forEach(function (pair) {
+    var box = document.querySelector(pair[0]);
+    if (!box) return;
+    var load = function () {
+      if (box.dataset.loaded) return;
+      box.dataset.loaded = '1';
+      var f = document.createElement('iframe');
+      f.title = pair[1];
+      f.referrerPolicy = 'no-referrer-when-downgrade';
+      f.loading = 'lazy';
+      f.scrolling = 'no';
+      f.src = box.dataset.src;
+      box.appendChild(f);
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries, obs) {
+        if (!entries[0].isIntersecting) return;
+        load(); obs.disconnect();
+      }, { rootMargin: pair[2] }).observe(box);
+    } else { load(); }
+  });
+
+  if (reduce) return;
+
+  /* --- BEAMS ------------------------------------------------------------- */
+  /* Nothing behind the hero. The layer comes up across the Social section and
+     stays for the rest of the page. The tilt drifts a few degrees on the way
+     down so the bands are not the same shape at the top and the bottom. */
+  var beams = document.querySelector('[data-beams]');
+  if (beams) {
+    /* The shader is deliberately left bright and the layer is dimmed here
+       instead: opacity on a composited layer is free, turning the light down
+       in the shader is not, and this is the one number to change if it wants
+       to be stronger or weaker. */
+    gsap.fromTo(beams, { opacity: 0 }, {
+      opacity: .30, ease: 'none',
+      scrollTrigger: { trigger: '#social', start: 'top 45%', end: 'bottom 55%', scrub: .8 }
+    });
+    /* Rendering is switched by scroll POSITION, never by reading the animated
+       opacity: that value is scrubbed with an 0.8s lag, so sampling it inside
+       a scroll handler raced the scrub and left the layer frozen at the Music
+       section. This trigger is simply active from the moment Social appears
+       until the end of the page, which is exactly when the layer is on. */
+    ScrollTrigger.create({
+      trigger: '#social', start: 'top bottom', end: 'max',
+      onToggle: function (self) {
+        if (window.KomnataBeams) window.KomnataBeams.setVisible(self.isActive);
+      }
+    });
+    ScrollTrigger.create({
+      start: 0, end: 'max',
+      onUpdate: function (self) {
+        if (window.KomnataBeams) window.KomnataBeams.setDrift(self.progress);
+      }
+    });
+  }
+
+  /* --- HEADLINES -------------------------------------------------------- */
+  /* Each <br> becomes its own masked line, so a headline rises in sequence. */
+  document.querySelectorAll('[data-reveal]').forEach(function (el) {
+    el.innerHTML = el.innerHTML.split(/<br\s*\/?>/i).map(function (l) {
+      return '<span class="ln"><i>' + l.trim() + '</i></span>';
+    }).join('');
+    gsap.from(el.querySelectorAll('.ln i'), {
+      yPercent: 105, duration: 1, ease: 'power3.out', stagger: .08,
+      scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+    });
+  });
+
+  /* --- PANELS ----------------------------------------------------------- */
+  gsap.utils.toArray('.cards, .records, .venue__grid, .stats').forEach(function (group) {
+    gsap.from(group.children, {
+      opacity: 0, y: 26, duration: .85, ease: 'power2.out', stagger: .08,
+      scrollTrigger: { trigger: group, start: 'top 85%', once: true }
+    });
+  });
+
+  gsap.utils.toArray('.lede').forEach(function (el) {
+    gsap.from(el, {
+      opacity: 0, y: 16, duration: .8, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 90%', once: true }
+    });
+  });
+
+  /* --- HERO ------------------------------------------------------------- */
+  /* fromTo, not from: every end value is stated, so nothing can be inferred
+     wrong and left sitting at zero. */
+  function rise(sel, at, stagger) {
+    return [sel, { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: .8, stagger: stagger || 0, clearProps: 'transform' }, at];
+  }
+  var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.fromTo.apply(tl, rise('.hero__mark', 0))
+    .fromTo.apply(tl, rise('.hero__slogan', 0.25))
+    .fromTo.apply(tl, rise('.hero .pills li', 0.42, .06))
+    .fromTo.apply(tl, rise('.hero__cta > *', 0.58, .08))
+    .fromTo.apply(tl, rise('.nav__mark, .nav__links a, .nav .btn', 0.3, .05))
+    .fromTo('.hero__down', { opacity: 0 }, { opacity: 1, duration: .6 }, 1.1);
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
+  }
+})();

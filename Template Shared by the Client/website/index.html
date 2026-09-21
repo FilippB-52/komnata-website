@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KOMNATA</title>
+
+<!-- SWAP: meta + Open Graph. The link gets pasted into chats constantly,
+     so a blank preview looks broken. og-image should be 1200x630. -->
+<meta name="description" content="KOMNATA is Madrid's international night with a Slavic soul.">
+<meta property="og:title" content="KOMNATA">
+<meta property="og:description" content="Madrid's international night with a Slavic soul.">
+<meta property="og:image" content="og-image.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.png">
+
+<!-- ===== META PIXEL =====================================================
+     SWAP: paste the real pixel from Meta Events Manager and put your ID in
+     place of PIXEL_ID below. Leave it commented until the ID exists, an
+     empty pixel just throws errors.
+
+     Track the ticket button as a conversion: both Buy tickets links carry
+     class "btn--primary", so after the pixel loads add
+
+       document.querySelectorAll('.btn--primary').forEach(function(b){
+         b.addEventListener('click', function(){ fbq('track','Lead'); });
+       });
+
+     Note: a pixel sets cookies, so once it is live the site needs a cookie
+     notice and a privacy line in the footer to be GDPR clean in Spain.
+
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','PIXEL_ID');
+fbq('track','PageView');
+</script>
+     ===================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* ==========================================================================
+   KØMNATA landing page.
+   Section order follows the draft: HOME / SOCIAL / MUSIC / GALLERY / MAP,
+   then the closing ticket button and footer.
+   Everything to replace is marked  SWAP:
+   ========================================================================== */
+
+/* --- TOKENS ------------------------------------------------------------- */
+:root{
+  --ink:#0B0C0D;          /* page background */
+  --surface:#16181A;      /* cards and wells */
+  --surface-2:#1E2124;    /* hover on a surface */
+  --bone:#EFECE6;         /* all text */
+  --cyan:#8DEEED;         /* ACCENT 01. Only things you can press */
+  --cyan-deep:#256F6E;    /* ACCENT 02. Lines and borders only, never text */
+  --mute:#6A706E;
+  --mute-2:#9AA09E;
+  --mute-3:#B8BDBA;
+  --hair:rgba(239,236,230,.14);
+  --hair-2:rgba(239,236,230,.28);
+
+  --sans:'Onest',ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --gutter:clamp(18px,4vw,48px);
+  --max:1240px;
+  --section-y:clamp(72px,11vw,150px);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:72px;}
+body{
+  background:var(--ink);color:var(--bone);font-family:var(--sans);
+  font-size:16px;line-height:1.6;margin:0;-webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+.shell{max-width:var(--max);margin:0 auto;padding-inline:var(--gutter);}
+section{padding-block:var(--section-y);}
+
+/* --- SHARED ------------------------------------------------------------- */
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--cyan);margin:0 0 16px;
+}
+.h2{font-size:clamp(26px,4.6vw,44px);font-weight:800;letter-spacing:-.035em;line-height:1.06;margin:0;text-wrap:balance;}
+.lede{color:var(--mute-3);font-size:clamp(15px,1.9vw,18px);margin:16px auto 0;max-width:56ch;}
+
+/* Buttons. Square, mono, uppercase. Never rounded. */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:clamp(240px,34vw,420px);
+  font-family:var(--mono);font-size:12.5px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  padding:20px 34px;border:1px solid transparent;cursor:pointer;
+  transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+/* SWAP: the draft drew this button in bone. It is cyan here so the accent has
+   somewhere to live. To go back to the draft, set background + border-color
+   to var(--bone) and the hover to var(--cyan). One line either way. */
+.btn--primary{background:var(--cyan);color:var(--ink);border-color:var(--cyan);}
+.btn--primary:hover{background:var(--bone);border-color:var(--bone);}
+.btn--ghost{background:transparent;color:var(--bone);border-color:var(--hair-2);}
+.btn--ghost:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* --- NAV ---------------------------------------------------------------- */
+/* Transparent, sticky, items spread across the full width. The section you
+   are in stays bone, the rest dim back. */
+.nav{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:60;
+  background:linear-gradient(180deg,rgba(11,12,13,.82) 0%,rgba(11,12,13,0) 100%);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding-block:20px 26px;
+}
+.nav ul{
+  list-style:none;margin:0;padding:0;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:8px;
+}
+.nav a{
+  font-family:var(--mono);font-size:clamp(9.5px,1.15vw,12px);
+  letter-spacing:.24em;text-transform:uppercase;
+  color:var(--bone);opacity:.42;white-space:nowrap;
+  padding:6px 2px;position:relative;
+  transition:opacity .25s ease,color .25s ease;
+}
+.nav a:hover{opacity:.8;}
+.nav a[aria-current="true"]{opacity:1;color:var(--cyan);}
+.nav a[aria-current="true"]::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--cyan-deep);
+}
+
+/* --- S01  HOME ---------------------------------------------------------- */
+.hero{
+  position:relative;overflow:hidden;
+  min-height:min(88svh,860px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  margin-top:calc(-1 * (72px + env(safe-area-inset-top,0px)));
+  padding-block:clamp(120px,18vw,180px) clamp(56px,9vw,100px);
+}
+.hero__media{position:absolute;inset:0;z-index:0;background:#000;}
+.hero__media video,.hero__media img{width:100%;height:100%;object-fit:cover;opacity:.5;}
+/* placeholder so the template is not blank before the video lands */
+.hero__media--placeholder{
+  background:
+    radial-gradient(130% 95% at 20% 6%, rgba(141,238,237,.14) 0%, transparent 56%),
+    radial-gradient(95% 75% at 86% 94%, rgba(37,111,110,.24) 0%, transparent 62%),
+    var(--ink);
+}
+.hero__scrim{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(11,12,13,.7) 0%,rgba(11,12,13,.25) 40%,rgba(11,12,13,.9) 100%);
+}
+.hero__inner{
+  position:relative;z-index:2;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* The wordmark is the real hand drawn mark, not type. The source PNG is a
+   square canvas with the mark as a centred band, so the box is set to the
+   band's ratio and the image is centred inside it.
+   SWAP: with a tightly cropped export this becomes a plain <img>. */
+.wordmark{
+  margin:0;width:min(86%,780px);aspect-ratio:5.5/1;
+  background:url("wordmark.png") center center / 100% auto no-repeat;
+}
+.wordmark span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+
+.hero__tagline{
+  font-size:clamp(15px,2.3vw,23px);font-weight:500;letter-spacing:-.015em;
+  color:var(--bone);margin:clamp(10px,1.6vw,18px) 0 0;
+}
+.hero__cta{margin-top:clamp(44px,8vw,110px);}
+.hero__strip{
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 20px;
+  margin-top:26px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute-2);
+}
+.hero__strip b{color:var(--bone);font-weight:500;}
+.hero__strip .pill{border:1px solid var(--cyan);color:var(--cyan);padding:5px 11px;}
+/* SWAP: between editions the pill reads "Announcing soon", loses the cyan
+   border (use var(--hair-2)) and the button points at Telegram instead. */
+
+/* --- S02  SOCIAL -------------------------------------------------------- */
+/* Blurred photo sits behind this section. */
+.social{position:relative;overflow:hidden;}
+.social__bg{position:absolute;inset:-60px;z-index:0;}
+.social__bg img{width:100%;height:100%;object-fit:cover;filter:blur(38px) saturate(.5);opacity:.4;}
+.social__bg--placeholder{
+  background:
+    radial-gradient(70% 60% at 25% 30%, rgba(141,238,237,.16) 0%, transparent 60%),
+    radial-gradient(70% 60% at 78% 72%, rgba(37,111,110,.3) 0%, transparent 62%);
+  filter:blur(28px);
+}
+.social__scrim{position:absolute;inset:0;z-index:1;background:rgba(11,12,13,.62);}
+.social .shell{position:relative;z-index:2;}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.4vw,28px);margin-top:44px;}
+@media (max-width:760px){.cards{grid-template-columns:1fr;}}
+.card{
+  position:relative;background:rgba(22,24,26,.82);border:1px solid var(--hair);
+  min-height:clamp(420px,52vw,600px);
+  display:flex;flex-direction:column;
+  padding:clamp(20px,2.6vw,30px);
+  transition:border-color .2s ease;
+}
+.card:hover{border-color:var(--cyan-deep);}
+.card__head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;}
+.card__name{font-size:clamp(22px,3.4vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1;}
+.card:hover .card__name{color:var(--cyan);}
+.card__handle{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute-2);white-space:nowrap;}
+.card__note{color:var(--mute-3);font-size:14.5px;margin:10px 0 0;}
+/* the widget drops in here */
+.card__widget{
+  position:relative;flex:1;margin-top:22px;
+  background:var(--surface-2);border:1px solid var(--hair);
+  min-height:220px;overflow:hidden;
+}
+.card__widget iframe,.card__widget > script + *{position:relative;z-index:1;width:100%;height:100%;border:0;}
+.card__fallback{
+  position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:20px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+}
+.card__link{
+  margin-top:18px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute-2);
+  border-bottom:1px solid var(--cyan-deep);padding-bottom:4px;align-self:flex-start;
+}
+.card__link:hover{color:var(--cyan);}
+
+/* --- S03  MUSIC --------------------------------------------------------- */
+.music{text-align:center;}
+.intro-bar{
+  border:1px solid var(--hair);background:var(--surface);
+  padding:clamp(22px,3vw,34px) clamp(20px,3vw,40px);margin-top:40px;
+}
+.intro-bar p{margin:0;color:var(--mute-3);font-size:clamp(15px,1.9vw,18px);max-width:64ch;margin-inline:auto;}
+.playlists{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.8vw,22px);margin-top:clamp(12px,1.8vw,22px);}
+@media (max-width:820px){.playlists{grid-template-columns:1fr;}}
+.playlist__label{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--mute-2);margin:0 0 10px;text-align:left;
+}
+/* The Spotify iframe brings its own green and rounded corners and cannot be
+   restyled, so we contain it in our own square well rather than fight it. */
+.well{
+  position:relative;background:var(--surface);border:1px solid var(--hair);
+  min-height:380px;overflow:hidden;
+}
+.well iframe{position:relative;z-index:1;display:block;width:100%;height:380px;border:0;}
+.well__fallback{
+  position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:20px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+}
+.music__cta{margin-top:clamp(12px,1.8vw,22px);}
+.music__cta .btn{width:100%;min-width:0;}
+
+/* --- S04  GALLERY ------------------------------------------------------- */
+.gallery{padding-inline:0;overflow:hidden;}
+.gallery__head{text-align:center;padding-inline:var(--gutter);}
+/* SWAP: drop the headline image in here. Until then the text below stands in.
+   <img class="gallery__headline" src="headline.png" alt="..."> */
+.gallery__headline{max-width:min(90%,900px);margin:0 auto;}
+.gallery__headline--text{
+  font-size:clamp(30px,6.4vw,74px);font-weight:900;letter-spacing:-.045em;line-height:.98;
+  margin:0;text-wrap:balance;
+}
+.marquee{margin-top:clamp(36px,5vw,60px);position:relative;}
+.marquee__track{
+  display:flex;gap:10px;width:max-content;
+  animation:slide 46s linear infinite;
+}
+.marquee:hover .marquee__track{animation-play-state:paused;}
+@keyframes slide{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@media (prefers-reduced-motion:reduce){
+  .marquee{overflow-x:auto;}
+  .marquee__track{animation:none;}
+}
+.shot{
+  flex:0 0 auto;width:clamp(200px,24vw,320px);aspect-ratio:3/4;max-width:100%;
+  background:var(--surface);border:0;padding:0;cursor:pointer;overflow:hidden;position:relative;
+}
+.shot img{width:100%;height:100%;object-fit:cover;transition:opacity .2s ease;}
+.shot:hover img{opacity:.78;}
+.shot--empty::after{
+  content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+  background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--surface-2) 10px 20px);
+}
+.gallery__note{
+  text-align:center;padding-inline:var(--gutter);margin-top:26px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;z-index:95;background:rgba(11,12,13,.96);display:flex;align-items:center;justify-content:center;padding:clamp(16px,5vw,64px);}
+.lightbox img{max-width:100%;max-height:82vh;object-fit:contain;}
+.lightbox__empty{width:min(480px,100%);aspect-ratio:3/4;background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--surface-2) 10px 20px);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);}
+.lightbox__bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px clamp(16px,4vw,34px);font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute-2);}
+.lightbox__btn{background:none;border:0;color:var(--bone);font:inherit;cursor:pointer;padding:8px;}
+.lightbox__btn:hover{color:var(--cyan);}
+.lightbox__nav{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--bone);font-size:26px;cursor:pointer;padding:18px;line-height:1;}
+.lightbox__nav:hover{color:var(--cyan);}
+.lightbox__nav--prev{left:2px;} .lightbox__nav--next{right:2px;}
+
+/* --- S05  MAP ----------------------------------------------------------- */
+.venue{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:clamp(14px,2.2vw,26px);margin-top:44px;}
+@media (max-width:820px){.venue{grid-template-columns:1fr;}}
+.venue__info{
+  background:var(--surface);border:1px solid var(--hair);
+  padding:clamp(22px,2.8vw,32px);display:flex;flex-direction:column;
+}
+.venue__name{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.05;}
+.venue__addr{color:var(--mute-3);margin:14px 0 0;font-size:15.5px;line-height:1.6;}
+.venue__meta{margin-top:auto;padding-top:28px;display:flex;flex-direction:column;gap:11px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute-2);}
+.venue__meta b{color:var(--bone);font-weight:500;}
+.venue__info .btn{margin-top:24px;min-width:0;width:100%;padding-block:16px;}
+.map{position:relative;border:1px solid var(--hair);background:var(--surface);min-height:clamp(320px,42vw,540px);overflow:hidden;}
+.map iframe{
+  position:relative;z-index:1;width:100%;height:100%;min-height:inherit;border:0;
+  /* This is what keeps Google's white map inside the palette.
+     Do not ship the section without it. */
+  filter:grayscale(1) invert(.92) contrast(.86);
+}
+.map__fallback{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);}
+
+/* --- S06  CLOSING + FOOTER ---------------------------------------------- */
+.close{text-align:center;border-top:1px solid var(--hair);}
+.close__line{font-size:clamp(26px,5.4vw,56px);font-weight:900;letter-spacing:-.04em;line-height:1.02;margin:0 0 clamp(32px,5vw,52px);text-wrap:balance;}
+.close__contact{margin-top:30px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);}
+.close__contact a{border-bottom:1px solid var(--cyan-deep);padding-bottom:2px;}
+.close__contact a:hover{color:var(--cyan);}
+
+footer{border-top:1px solid var(--hair);padding-block:clamp(40px,6vw,64px) clamp(30px,4vw,44px);}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 28px;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);}
+.foot__mark{width:150px;aspect-ratio:5.5/1;opacity:.45;background:url("wordmark.png") center center / 100% auto no-repeat;}
+.foot nav{display:flex;gap:22px;flex-wrap:wrap;}
+.foot a:hover{color:var(--cyan);}
+</style>
+</head>
+<body>
+
+
+<!-- ======================= NAV ======================= -->
+<div class="nav">
+  <div class="shell">
+    <ul>
+      <li><a href="#home" data-nav="home">Home</a></li>
+      <li><a href="#social" data-nav="social">Social</a></li>
+      <li><a href="#music" data-nav="music">Music</a></li>
+      <li><a href="#gallery" data-nav="gallery">Gallery</a></li>
+      <li><a href="#map" data-nav="map">Map</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ======================= S01  HOME ======================= -->
+<header class="hero" id="home">
+  <!-- SWAP: replace with the real loop.
+       <div class="hero__media"><video autoplay muted loop playsinline poster="hero.jpg"><source src="hero.mp4" type="video/mp4"></video></div>
+       Crowd footage, not the booth. Under 3 MB, 8 to 12 seconds. -->
+  <div class="hero__media hero__media--placeholder"></div>
+  <div class="hero__scrim"></div>
+
+  <div class="hero__inner shell">
+    <h1 class="wordmark" role="img" aria-label="KØMNATA"><span>KØMNATA</span></h1>
+    <p class="hero__tagline">Live today. Plan tomorrow. Party tonight.</p>
+
+    <!-- SWAP: href goes to the current edition's ticket page -->
+    <a class="btn btn--primary hero__cta" href="#tickets">Buy tickets</a>
+
+    <div class="hero__strip">
+      <!-- SWAP: date, venue and status each edition -->
+      <span><b>Fri 25 Sep</b></span>
+      <span>Frecuencia · Madrid</span>
+      <span class="pill">Tickets live</span>
+    </div>
+  </div>
+</header>
+
+
+<!-- ======================= S02  SOCIAL ======================= -->
+<section class="social" id="social">
+  <!-- SWAP: a real photo here. It gets blurred and dimmed by the CSS.
+       <div class="social__bg"><img src="photos/crowd.webp" alt=""></div> -->
+  <div class="social__bg social__bg--placeholder"></div>
+  <div class="social__scrim"></div>
+
+  <div class="shell">
+    <p class="eyebrow">Social</p>
+    <h2 class="h2">Everything lands in the Telegram first</h2>
+
+    <div class="cards">
+      <!-- SWAP: real link + handle -->
+      <a class="card" href="#" target="_blank" rel="noopener">
+        <div class="card__head">
+          <div class="card__name">Telegram</div>
+          <div class="card__handle">@komnata</div>
+        </div>
+        <p class="card__note">Dates, drops and access land here first.</p>
+        <div class="card__widget">
+          <div class="card__fallback">Telegram widget<br>widgets.telegram.org</div>
+          <!-- SWAP: Telegram's own post widget. From widgets.telegram.org, paste
+               the <script async src="https://telegram.org/js/telegram-widget.js" ...>
+               tag in here. It renders a live post from the channel. -->
+        </div>
+        <span class="card__link">Open Telegram</span>
+      </a>
+
+      <!-- SWAP: real link + handle -->
+      <a class="card" href="#" target="_blank" rel="noopener">
+        <div class="card__head">
+          <div class="card__name">Instagram</div>
+          <div class="card__handle">@komnata</div>
+        </div>
+        <p class="card__note">The room, the crowd, the recaps.</p>
+        <div class="card__widget">
+          <div class="card__fallback">Instagram embed<br>see the note below</div>
+          <!-- NOTE: Instagram has no official widget for a whole profile feed
+               any more, only single-post embeds via their oEmbed. Three options:
+               1. embed one strong recent post (official, free, static)
+               2. a third party feed widget (Elfsight, Behold, SnapWidget) which
+                  needs an account and loads their script
+               3. skip the widget and make the card a big image + follower count
+               Option 1 or 3 keeps the page fast and free. -->
+        </div>
+        <span class="card__link">Open Instagram</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= S03  MUSIC ======================= -->
+<section class="music" id="music">
+  <div class="shell">
+    <p class="eyebrow">Music</p>
+    <h2 class="h2">What the room sounds like</h2>
+
+    <div class="intro-bar">
+      <p>Mostly what the whole room already knows, with the Slavic tracks folded in so they land as energy and not as a language barrier.</p>
+    </div>
+
+    <div class="playlists">
+      <!-- SWAP x3: Spotify > playlist > Share > Embed playlist.
+           Paste the src into the iframe and add ?theme=0 for the dark player.
+           Keep loading="lazy", these are heavy. -->
+      <div>
+        <div class="well">
+          <div class="well__fallback">Spotify playlist 01</div>
+          <iframe title="KØMNATA playlist 01" loading="lazy" allow="encrypted-media"></iframe>
+        </div>
+        <p class="playlist__label" style="margin-top:10px;margin-bottom:0">The main room</p>
+      </div>
+      <div>
+        <div class="well">
+          <div class="well__fallback">Spotify playlist 02</div>
+          <iframe title="KØMNATA playlist 02" loading="lazy" allow="encrypted-media"></iframe>
+        </div>
+        <p class="playlist__label" style="margin-top:10px;margin-bottom:0">Slavic side</p>
+      </div>
+      <div>
+        <div class="well">
+          <div class="well__fallback">Spotify playlist 03</div>
+          <iframe title="KØMNATA playlist 03" loading="lazy" allow="encrypted-media"></iframe>
+        </div>
+        <p class="playlist__label" style="margin-top:10px;margin-bottom:0">After</p>
+      </div>
+    </div>
+
+    <div class="music__cta">
+      <!-- SWAP: the KØMNATA Spotify artist or user profile -->
+      <a class="btn btn--ghost" href="#" target="_blank" rel="noopener">Follow KØMNATA on Spotify</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= S04  GALLERY ======================= -->
+<section class="gallery" id="gallery">
+  <div class="gallery__head">
+    <!-- SWAP: your headline artwork goes here as an image.
+         <img class="gallery__headline" src="gallery-headline.png" alt="...">
+         Delete the <p> below once it is in. -->
+    <p class="gallery__headline gallery__headline--text">Nights we already had</p>
+  </div>
+
+  <!-- Full bleed, auto scrolling, pauses on hover. The tiles are duplicated
+       once so the loop is seamless: keep both halves identical when you swap
+       in real photos.
+       SWAP: <img src="photos/01.webp" alt="" loading="lazy"> inside each
+       button, and remove the shot--empty class. -->
+  <div class="marquee">
+    <div class="marquee__track" id="track">
+      <button class="shot shot--empty" data-label="01" type="button"></button>
+      <button class="shot shot--empty" data-label="02" type="button"></button>
+      <button class="shot shot--empty" data-label="03" type="button"></button>
+      <button class="shot shot--empty" data-label="04" type="button"></button>
+      <button class="shot shot--empty" data-label="05" type="button"></button>
+      <button class="shot shot--empty" data-label="06" type="button"></button>
+      <button class="shot shot--empty" data-label="07" type="button"></button>
+      <button class="shot shot--empty" data-label="08" type="button"></button>
+      <!-- duplicate set, keeps the loop seamless -->
+      <button class="shot shot--empty" data-label="01" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="02" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="03" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="04" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="05" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="06" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="07" type="button" aria-hidden="true" tabindex="-1"></button>
+      <button class="shot shot--empty" data-label="08" type="button" aria-hidden="true" tabindex="-1"></button>
+    </div>
+  </div>
+
+  <p class="gallery__note">Hover to pause · click to open</p>
+</section>
+
+
+<!-- ======================= S05  MAP ======================= -->
+<section id="map">
+  <div class="shell">
+    <p class="eyebrow">Map</p>
+    <h2 class="h2">The door</h2>
+
+    <div class="venue">
+      <div class="venue__info">
+        <!-- SWAP: confirm the street address and metro stop -->
+        <h3 class="venue__name">Frecuencia</h3>
+        <p class="venue__addr">Street address<br>Madrid, Spain</p>
+        <div class="venue__meta">
+          <span>Metro <b>Line and stop</b></span>
+          <span>Doors <b>00:00 to 06:00</b></span>
+        </div>
+        <!-- SWAP: Google Maps link to the venue -->
+        <a class="btn btn--primary" href="#" target="_blank" rel="noopener">Directions</a>
+      </div>
+
+      <!-- SWAP: Google Maps > search the venue > Share > Embed a map > copy the
+           iframe src into here. The dark filter is in the CSS, leave it on. -->
+      <div class="map">
+        <div class="map__fallback">Google map<br>Frecuencia, Madrid</div>
+        <iframe title="Map to Frecuencia, Madrid" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= S06  CLOSING + FOOTER ======================= -->
+<section class="close" id="tickets">
+  <div class="shell">
+    <p class="close__line">One room. One night.<br>One sound.</p>
+    <!-- SWAP: same ticket link as the hero -->
+    <a class="btn btn--primary" href="#">Buy tickets</a>
+    <p class="close__contact">Bookings and partnerships <a href="mailto:hello@komnata.com">hello@komnata.com</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="shell foot">
+    <div class="foot__mark" role="img" aria-label="KØMNATA"></div>
+    <nav>
+      <a href="#" target="_blank" rel="noopener">Telegram</a>
+      <a href="#" target="_blank" rel="noopener">Instagram</a>
+      <a href="#" target="_blank" rel="noopener">Spotify</a>
+      <a href="#map">Find us</a>
+    </nav>
+    <span>Madrid · 2026</span>
+  </div>
+</footer>
+
+
+<script>
+/* --- Scroll spy. Lights the current nav item, dims the rest. ------------- */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('[data-nav]'));
+  var ids = links.map(function(a){ return a.getAttribute('data-nav'); });
+  var sections = ids.map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  if(!sections.length) return;
+
+  function setActive(id){
+    links.forEach(function(a){
+      a.setAttribute('aria-current', a.getAttribute('data-nav') === id ? 'true' : 'false');
+    });
+  }
+  setActive('home');
+
+  var obs = new IntersectionObserver(function(entries){
+    var best = null;
+    entries.forEach(function(e){
+      if(e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) best = e;
+    });
+    if(best) setActive(best.target.id);
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: [0, 0.25, 0.5, 1] });
+
+  sections.forEach(function(s){ obs.observe(s); });
+})();
+
+/* --- Lightbox. Works with placeholders and with real images. ------------- */
+(function(){
+  var track = document.getElementById('track');
+  if(!track) return;
+  var box = null, index = 0;
+
+  /* only the first, non-duplicated half is navigable */
+  function shots(){
+    return Array.prototype.slice.call(track.querySelectorAll('.shot'))
+      .filter(function(el){ return el.getAttribute('aria-hidden') !== 'true'; });
+  }
+
+  function render(){
+    var all = shots(), shot = all[index];
+    if(!box || !shot) return;
+    var img = shot.querySelector('img');
+    var stage = box.querySelector('.lightbox__stage');
+    stage.innerHTML = '';
+    if(img){
+      var big = document.createElement('img');
+      big.src = img.currentSrc || img.src;
+      big.alt = img.alt || '';
+      stage.appendChild(big);
+    } else {
+      var ph = document.createElement('div');
+      ph.className = 'lightbox__empty';
+      ph.textContent = shot.getAttribute('data-label') || '';
+      stage.appendChild(ph);
+    }
+    box.querySelector('.lightbox__count').textContent = (index + 1) + ' / ' + all.length;
+  }
+
+  function open(i){
+    index = i;
+    box = document.createElement('div');
+    box.className = 'lightbox';
+    box.innerHTML =
+      '<div class="lightbox__bar"><span class="lightbox__count"></span>'+
+      '<button class="lightbox__btn" type="button" data-close>Close</button></div>'+
+      '<button class="lightbox__nav lightbox__nav--prev" type="button" data-prev aria-label="Previous">&#8592;</button>'+
+      '<div class="lightbox__stage"></div>'+
+      '<button class="lightbox__nav lightbox__nav--next" type="button" data-next aria-label="Next">&#8594;</button>';
+    document.body.appendChild(box);
+    document.body.style.overflow = 'hidden';
+    render();
+    box.addEventListener('click', function(e){
+      if(e.target.hasAttribute('data-close') || e.target === box) close();
+      if(e.target.hasAttribute('data-prev')) step(-1);
+      if(e.target.hasAttribute('data-next')) step(1);
+    });
+  }
+
+  function step(d){
+    var all = shots();
+    index = (index + d + all.length) % all.length;
+    render();
+  }
+
+  function close(){
+    if(!box) return;
+    box.remove(); box = null;
+    document.body.style.overflow = '';
+  }
+
+  track.addEventListener('click', function(e){
+    var shot = e.target.closest('.shot');
+    if(!shot) return;
+    var all = shots();
+    var i = all.indexOf(shot);
+    /* a click on a duplicate opens its original */
+    if(i === -1){
+      var label = shot.getAttribute('data-label');
+      i = all.findIndex(function(s){ return s.getAttribute('data-label') === label; });
+    }
+    if(i > -1) open(i);
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!box) return;
+    if(e.key === 'Escape') close();
+    if(e.key === 'ArrowLeft') step(-1);
+    if(e.key === 'ArrowRight') step(1);
+  });
+})();
+</script>
+
+</body>
+</html>

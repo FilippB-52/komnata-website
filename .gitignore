@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Source media, 236 MB of originals. Kept local only.
+/Videos & Images/
+
+# Tooling
+/node_modules/
+/.vercel/

@@ -1,0 +1,335 @@
+/* ==========================================================================
+   KØMNATA — vinyl player
+   A record on a platter, seen from straight above. Everything is drawn in
+   percentages of one square stage (1000 x 1000 conceptual units), so the unit
+   scales from 240px to 900px without a single value needing a tweak.
+
+   Geometry, in stage units, centre at 500/500:
+     platter rim   r 446   inset  5.4%
+     rim inner     r 382   (85.6% of the rim, see the ring overlay)
+     recess        r 382 → 368
+     record        r 368   inset 13.2%
+     label         r 121   inset 33.5% of the record box
+     spindle       r  10.5 inset 48.6% of the record box
+     arm pivot     912/178, outside the platter at the top right
+
+   Two rules hold the illusion together:
+   1. The light comes from the top left and never moves. Grooves and label
+      rotate, the specular gloss does not. A record that carries its highlight
+      around with it reads as a spinning drawing, not as vinyl.
+   2. Every radial-gradient that sets a radius says `closest-side`. Without it
+      100% means the corner of the box, not the edge of the circle, and every
+      ring lands 41% too far out.
+   ========================================================================== */
+
+.vinyl{
+  /* Tokens fall back to the brand values so the component works on its own. */
+  --v-night:var(--night,#0B0C0D);
+  --v-bone:var(--bone,#EFECE6);
+  --v-cyan:var(--cyan,#8DEEED);
+  --v-mono:var(--mono,'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace);
+  --v-sans:var(--sans,'Onest',ui-sans-serif,system-ui,-apple-system,sans-serif);
+
+  --v-size:min(560px,82vw);   /* the one number worth changing */
+  --v-label:33.5%;            /* label inset. 33.5% is a real 4in label on a
+                                 12in record; 26% reads as a picture disc */
+  --v-art:50% 50%;            /* which part of a non-square cover to keep */
+  --v-rot:0deg;               /* written by the script, every frame */
+  --v-arm:3deg;               /* tonearm travel, 0 at the lead-in groove */
+
+  position:relative;
+  width:var(--v-size);
+  aspect-ratio:1;
+  flex:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.vinyl__stage{position:absolute;inset:0;}
+
+/* --- CONTACT SHADOW ------------------------------------------------------
+   The unit sits on the page rather than being pasted onto it. Offset down and
+   right, away from the light. */
+.vinyl__shadow{
+  position:absolute;left:2%;right:2%;top:7%;bottom:-3%;
+  border-radius:50%;
+  background:radial-gradient(closest-side,rgba(0,0,0,.8),rgba(0,0,0,.38) 60%,transparent 100%);
+  filter:blur(30px);
+  pointer-events:none;
+}
+
+/* --- PLATTER RIM ---------------------------------------------------------
+   Machined aluminium, not a white ring. Lit by a conic model rather than a
+   linear one: a hard primary highlight at the top left, a cooler rim light
+   bouncing back on the bottom right, and the two quadrants between them left
+   in shadow. That is what keeps the ring reading the whole way round instead
+   of dissolving into the page on its dark side. */
+.vinyl__rim{
+  position:absolute;inset:5.4%;
+  border-radius:50%;
+  background:
+    /* two scribe lines turned into the face */
+    radial-gradient(circle closest-side at 50% 50%,
+      transparent 0 88.2%,rgba(0,0,0,.55) 88.2% 88.8%,rgba(255,255,255,.1) 88.8% 89.2%,
+      transparent 89.2% 95.6%,rgba(0,0,0,.5) 95.6% 96.1%,rgba(255,255,255,.12) 96.1% 96.5%,
+      transparent 96.5%),
+    /* the cross section: inner chamfer, crown, falloff, lit outer lip */
+    radial-gradient(circle closest-side at 50% 50%,
+      transparent 0 85%,
+      rgba(0,0,0,.88) 85.4%,
+      rgba(0,0,0,.34) 86.8%,
+      rgba(255,255,255,.15) 88.6%,
+      rgba(255,255,255,.02) 93%,
+      rgba(0,0,0,.3) 97.4%,
+      rgba(0,0,0,.06) 98.6%,
+      rgba(255,255,255,.3) 99.3%,
+      rgba(255,255,255,.14) 99.7%,
+      rgba(0,0,0,.6) 100%),
+    /* brushed grain, turned from the centre outward */
+    repeating-conic-gradient(from 0deg at 50% 50%,
+      rgba(255,255,255,.05) 0deg .16deg,
+      rgba(0,0,0,.06) .16deg .34deg,
+      transparent .34deg .58deg),
+    /* the light itself. Hard arcs, real black in the shadow quadrants. */
+    conic-gradient(from 0deg at 50% 50%,
+      #5A5E62   0deg,
+      #2A2E31  30deg,
+      #191C1E  58deg,
+      #3C4043  86deg,
+      #6E7276 106deg,
+      #B6B1A7 126deg,
+      #E8E4DB 138deg,
+      #8A867D 153deg,
+      #44474A 172deg,
+      #23262A 200deg,
+      #17191B 224deg,
+      #3A3E41 248deg,
+      #7E8285 270deg,
+      #CBC6BB 294deg,
+      #FCF9F2 316deg,
+      #D4CFC4 331deg,
+      #83868A 345deg,
+      #5A5E62 360deg);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.7),
+    0 16px 40px rgba(0,0,0,.6);
+}
+
+/* --- RECESS --------------------------------------------------------------
+   The dark gap between the machined ring and the edge of the record. Narrow,
+   so the record reads as sitting down inside the platter. */
+.vinyl__mat{
+  position:absolute;inset:11.8%;
+  border-radius:50%;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 50%,
+      rgba(255,255,255,.018) 0deg .4deg,transparent .4deg 1.2deg),
+    radial-gradient(circle closest-side at 36% 28%,#1B1F22,#0A0C0D 70%,#030405);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(0,0,0,.95),
+    inset 3px 4px 9px rgba(0,0,0,1);
+}
+
+/* --- THE RECORD ---------------------------------------------------------- */
+.vinyl__disc{
+  position:absolute;inset:13.2%;
+  border-radius:50%;
+  background:radial-gradient(circle closest-side at 40% 32%,#1B1E21 0%,#0C0E10 46%,#040506 100%);
+  cursor:grab;
+  touch-action:none;               /* the drag is ours, not the browser's */
+  isolation:isolate;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    inset 8px 10px 26px rgba(255,255,255,.05),
+    inset -10px -12px 32px rgba(0,0,0,.9),
+    0 8px 24px rgba(0,0,0,.7);
+  outline:none;
+}
+.vinyl.is-held .vinyl__disc{cursor:grabbing;}
+
+/* every rotating layer lives in here */
+.vinyl__spin{
+  position:absolute;inset:0;border-radius:50%;
+  transform:rotate(var(--v-rot)) translateZ(0);
+  transform-style:flat;
+  backface-visibility:hidden;
+  will-change:transform;
+}
+
+/* Grooves. Two periods over each other: the coarse one carries the light, the
+   fine one stops it reading as a target. Smooth lead-in at the edge and a
+   smooth run-out before the label, the same as a pressing. */
+.vinyl__grooves{
+  position:absolute;inset:0;border-radius:50%;
+  background:
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.105) 0px,
+      rgba(0,0,0,.44) 1.7px,
+      rgba(255,255,255,.105) 3.4px),
+    repeating-radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,.05) 0px,
+      transparent 1.2px,
+      rgba(255,255,255,.05) 2.4px);
+  /* the run-out has to clear the label, whatever --v-label is set to */
+  --v-runout:calc(100% - var(--v-label) * 2 - 1%);
+  -webkit-mask-image:radial-gradient(circle closest-side at 50% 50%,
+    transparent 0 var(--v-runout),#000 calc(var(--v-runout) + 2%) 95.4%,transparent 97.2%);
+          mask-image:radial-gradient(circle closest-side at 50% 50%,
+    transparent 0 var(--v-runout),#000 calc(var(--v-runout) + 2%) 95.4%,transparent 97.2%);
+}
+
+/* The lands between tracks. Four of them, uneven, because tracks are. */
+.vinyl__bands{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle closest-side at 50% 50%,
+    transparent 0 45.8%,rgba(0,0,0,.4) 45.8% 46.2%,rgba(255,255,255,.075) 46.2% 46.9%,transparent 46.9% 59.6%,
+    rgba(0,0,0,.4) 59.6% 60%,rgba(255,255,255,.07) 60% 60.6%,transparent 60.6% 72.3%,
+    rgba(0,0,0,.4) 72.3% 72.7%,rgba(255,255,255,.062) 72.7% 73.3%,transparent 73.3% 87%,
+    rgba(0,0,0,.45) 87% 87.5%,rgba(255,255,255,.085) 87.5% 88.3%,transparent 88.3%);
+}
+
+/* The pressing's own reflectivity. This one rotates, and it is what lets the
+   eye read the spin out at the rim, before it reaches the label. */
+.vinyl__sheen{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg at 50% 50%,
+    rgba(255,255,255,0) 0deg,
+    rgba(255,255,255,.075) 22deg,
+    rgba(255,255,255,0) 56deg,
+    rgba(255,255,255,0) 166deg,
+    rgba(255,255,255,.05) 194deg,
+    rgba(255,255,255,0) 230deg,
+    rgba(255,255,255,0) 360deg);
+}
+
+/* Dust and one hairline scuff. Three specks, no more. */
+.vinyl__dust{
+  position:absolute;inset:0;border-radius:50%;
+  background:
+    radial-gradient(circle at 68% 29%,rgba(255,255,255,.34) 0 .7px,transparent 1.5px),
+    radial-gradient(circle at 33% 71%,rgba(255,255,255,.24) 0 .6px,transparent 1.3px),
+    radial-gradient(circle at 57% 78%,rgba(255,255,255,.18) 0 .5px,transparent 1.1px);
+}
+.vinyl__dust::after{
+  content:'';position:absolute;inset:16%;border-radius:50%;
+  border:1px solid rgba(255,255,255,.06);
+  clip-path:polygon(50% 50%,100% 16%,100% 44%);
+}
+
+/* --- LABEL --------------------------------------------------------------- */
+.vinyl__label{
+  position:absolute;inset:var(--v-label);border-radius:50%;
+  overflow:hidden;
+  background:var(--v-night);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.8),
+    0 0 16px 3px rgba(0,0,0,.6);
+}
+.vinyl__label img,.vinyl__label svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:var(--v-art);display:block;
+}
+
+/* --- FIXED LIGHT ---------------------------------------------------------
+   Does not rotate. The long soft sweep is the room; the small one on the far
+   side is the same light coming back off the platter. */
+.vinyl__gloss{
+  position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:
+    radial-gradient(58% 44% at 24% 18%,rgba(255,255,255,.135),transparent 74%),
+    radial-gradient(32% 24% at 74% 86%,rgba(255,255,255,.055),transparent 78%),
+    linear-gradient(138deg,rgba(255,255,255,.055) 0%,transparent 32%,transparent 70%,rgba(0,0,0,.3) 100%);
+  mix-blend-mode:screen;
+}
+.vinyl__edge{
+  position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.1),
+    inset 6px 7px 1px -5px rgba(255,255,255,.55),
+    inset -6px -7px 1px -5px rgba(255,255,255,.2);
+  transition:box-shadow .45s ease;
+}
+/* Cyan is the live state and nothing else. It arrives on the grab. */
+.vinyl.is-held .vinyl__edge,
+.vinyl__disc:focus-visible .vinyl__edge{
+  /* --v-cyan has to actually drive this, or an override that mutes the grab
+     colour looks like it worked and silently does nothing. First declaration
+     is the fallback, the second wins wherever color-mix is supported. */
+  box-shadow:
+    inset 0 0 0 1.5px rgba(141,238,237,.5),
+    inset 0 0 26px rgba(141,238,237,.14),
+    inset 6px 7px 1px -5px rgba(255,255,255,.55),
+    inset -6px -7px 1px -5px rgba(255,255,255,.2);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb,var(--v-cyan) 50%,transparent),
+    inset 0 0 26px color-mix(in srgb,var(--v-cyan) 14%,transparent),
+    inset 6px 7px 1px -5px rgba(255,255,255,.55),
+    inset -6px -7px 1px -5px rgba(255,255,255,.2);
+}
+
+/* --- SPINDLE ------------------------------------------------------------- */
+.vinyl__hole{
+  position:absolute;inset:48.6%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle closest-side at 38% 32%,#34393D,#0A0B0C 60%,#000);
+  box-shadow:
+    inset 0 -1px 2px rgba(255,255,255,.26),
+    inset 0 1px 2px rgba(0,0,0,.9),
+    0 0 0 1px rgba(255,255,255,.12),
+    0 2px 4px rgba(0,0,0,.85);
+}
+
+/* --- TONEARM -------------------------------------------------------------
+   Drawn flat along +x from the pivot and swung into place, so the only value
+   that ever animates is one angle. */
+.vinyl__arm{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;overflow:visible;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),filter .5s ease;
+  filter:drop-shadow(5px 9px 8px rgba(0,0,0,.66));
+}
+.vinyl__arm-swing{
+  transform-box:view-box;
+  transform-origin:912px 178px;
+  transform:rotate(var(--v-arm));
+}
+/* the cue lift: the arm rises off the record while the record is held */
+.vinyl.is-held .vinyl__arm{
+  transform:translate(-.5%,-.85%);
+  filter:drop-shadow(9px 16px 13px rgba(0,0,0,.72));
+}
+
+/* --- NOTES ---------------------------------------------------------------
+   Music coming off the stylus. Faint, slow, and never more than a few. */
+.vinyl__notes{
+  position:absolute;inset:0;pointer-events:none;overflow:visible;
+  contain:layout style;   /* a note appearing must not repaint the record */
+}
+.vinyl__note{
+  position:absolute;left:0;top:0;
+  font-family:var(--v-sans);
+  font-size:var(--n-size,17px);
+  line-height:1;
+  color:var(--v-bone);
+  opacity:0;
+  animation:vinyl-note var(--n-dur,3.4s) cubic-bezier(.25,.5,.35,1) forwards;
+}
+@keyframes vinyl-note{
+  0%   {opacity:0;
+        transform:translate(-50%,-50%) translate(0,0) rotate(0deg) scale(.58);}
+  16%  {opacity:var(--n-peak,.4);}
+  55%  {opacity:calc(var(--n-peak,.4) * .74);
+        transform:translate(-50%,-50%)
+          translate(calc(var(--n-dx,0px) * .34 + var(--n-sway,8px)),calc(var(--n-dy,-120px) * .56))
+          rotate(calc(var(--n-rot,12deg) * .5)) scale(.95);}
+  100% {opacity:0;
+        transform:translate(-50%,-50%)
+          translate(var(--n-dx,0px),var(--n-dy,-120px))
+          rotate(var(--n-rot,12deg)) scale(1.06);}
+}
+
+/* --- STATES -------------------------------------------------------------- */
+.vinyl__disc:focus-visible{outline:none;}
+
+@media (prefers-reduced-motion:reduce){
+  .vinyl__arm{transition:none;}
+  .vinyl__note{display:none;}
+}

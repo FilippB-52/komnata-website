@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KØMNATA — Madrid</title>
+
+<meta name="description" content="KØMNATA is Madrid's international night with a Slavic soul.">
+<meta property="og:title" content="KØMNATA">
+<meta property="og:description" content="Madrid's international night with a Slavic soul.">
+<meta property="og:image" content="assets/img/og-image.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0B0C0D">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
+<script>document.documentElement.className="js";</script>
+</head>
+
+<body>
+
+<!-- ===== BEAMS =========================================================
+     Vanilla Three.js port of the Beams component. Two fields of noise-
+     displaced planes laid almost flat, crossing each other, lit by one
+     directional light each. It sits at z-index -1 under the page, so any
+     section with its own background hides it and it reads between them.
+     The layer ends in a fade to the page ground on all four sides: the
+     beam field is finite and its ends would otherwise stop dead mid-screen.
+     JS brings it up across the Social section, so the hero is untouched.
+     Every knob is in CFG at the top of beams.js.
+     ==================================================================== -->
+<div class="beams" data-beams aria-hidden="true">
+  <canvas></canvas>
+  <span class="beams__fade"></span>
+</div>
+
+<!-- ======================= NAV ======================= -->
+<header class="nav" id="nav">
+  <nav class="nav__links">
+    <a href="#social" data-nav="social">Social</a>
+    <a href="#music" data-nav="music">Music</a>
+    <a href="#gallery" data-nav="gallery">Gallery</a>
+    <a href="#map" data-nav="map">Map</a>
+    <a href="#tickets" data-nav="tickets">Tickets</a>
+  </nav>
+</header>
+
+
+<!-- ======================= HERO ======================= -->
+<section class="hero" id="home">
+  <!-- Back to the cut that worked. 1920x1080 h264, no audio, faststart,
+       19.8s, 3.8 MB, crf 16 with -tune grain from the v6 master, ungraded and
+       at original speed. The slowed and brightened experiment is still on disk
+       as hero-v6b.mp4 if it is ever wanted; it is not wired up. -->
+  <video class="hero__video" autoplay muted loop playsinline preload="auto"
+         poster="assets/img/hero-poster.jpg" aria-hidden="true">
+    <source src="assets/video/hero-v6.mp4" type="video/mp4">
+  </video>
+  <div class="hero__scrim" aria-hidden="true"></div>
+
+  <div class="hero__inner">
+    <img class="hero__mark" src="assets/img/wordmark-tight.png" alt="KØMNATA" width="1953" height="427" fetchpriority="high">
+    <p class="hero__slogan">Live today. Plan tomorrow. Party tonight.</p>
+
+    <a class="btn btn--lg hero__buy" href="#tickets">Buy tickets</a>
+
+    <!-- Edition line, confirmed against the Patt event page and the Instagram bio -->
+    <p class="hero__meta">27 Frames &nbsp;·&nbsp; Friday 25 September &nbsp;·&nbsp; Frecuencia, Madrid</p>
+  </div>
+
+  <a class="hero__down" href="#social" aria-label="Scroll down"></a>
+</section>
+
+
+<!-- ======================= Ø2  SOCIAL ======================= -->
+<section class="social" id="social">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2" data-reveal>Our channels</h2>
+      <p class="lede lede--sm">Dates, table drops and guest list open on Telegram before anywhere else.</p>
+    </div>
+
+    <div class="cards">
+      <a class="card" href="https://t.me/itskomnataa" target="_blank" rel="noopener">
+        <span class="chip" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 4.5 2.8 11.4c-.9.3-.9 1.6 0 1.9l4.8 1.5 1.8 5.4c.3.8 1.3 1 1.9.4l2.6-2.6 4.8 3.5c.7.5 1.7.1 1.9-.7l3-14.5c.2-.9-.7-1.6-1.6-1.2Z"/>
+            <path d="M7.6 14.8 18.8 7"/>
+          </svg>
+        </span>
+        <h3 class="card__name">Telegram</h3>
+        <p class="card__note">@itskomnataa. Dates, drops and access land here first.</p>
+        <!-- Telegram's own post widget renders an empty stub for this channel:
+             every post embed returns "Please open Telegram to view this post"
+             and t.me/s/itskomnataa redirects away instead of showing the web
+             preview. That is content protection on the channel, which the
+             channel admin turns off in Manage channel. Once it is off, swap
+             this block for:
+               <script async src="https://telegram.org/js/telegram-widget.js?22"
+                 data-telegram-post="itskomnataa/12" data-width="100%"
+                 data-dark="1"></script> -->
+        <div class="card__slot card__slot--mark">
+          <img src="assets/img/favicon-192.png" alt="" width="192" height="192" loading="lazy">
+          <span>@itskomnataa</span>
+        </div>
+        <span class="card__go">Open the channel</span>
+      </a>
+
+      <a class="card" href="https://www.instagram.com/itskomnata/" target="_blank" rel="noopener">
+        <span class="chip" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1"/>
+          </svg>
+        </span>
+        <h3 class="card__name">Instagram</h3>
+        <p class="card__note">@itskomnata. The room, the crowd, the recaps.</p>
+        <!-- Instagram's own profile embed. It is the only free endpoint that
+             still shows a whole grid, it needs no token, and it updates itself.
+             It only renders on white, which is why it sits on its own panel. -->
+        <div class="card__slot card__slot--light" data-ig
+             data-src="https://www.instagram.com/itskomnata/embed"></div>
+        <span class="card__go">Open the profile</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= Ø3  MUSIC ======================= -->
+<section class="music" id="music">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2" data-reveal>What we play</h2>
+      <p class="lede lede--sm">Three records. Play them before you come and you already know the night.</p>
+    </div>
+
+    <div class="records">
+      <!-- --v-art 50% 34% was picked by eye against 18 / 50 / 76 on this
+           portrait cover. Do not change it without looking at it rendered.
+           The other two have no cover yet and fall back to the drawn KØMNATA
+           label on purpose. Recipe for pulling more covers, no API key needed,
+           is in components/vinyl-player/README.md. -->
+      <article class="record">
+        <div data-vinyl
+             data-cover="assets/img/playlists/rus-komnata.jpg"
+             data-title="рус комната 7.000.000+"
+             data-turn="11"
+             style="--v-label:30%;--v-art:50% 34%"></div>
+        <h3 class="record__name">рус комната 7.000.000+</h3>
+        <p class="record__note">The half of the room that sings along.</p>
+        <a class="record__link" href="https://open.spotify.com/playlist/5jDcL7P0EZ90OxR35QT4km"
+           target="_blank" rel="noopener">Open on Spotify</a>
+      </article>
+
+      <!-- SWAP: playlist two. Add data-cover + href when the link arrives. -->
+      <article class="record">
+        <div data-vinyl data-title="The main room" data-turn="13"></div>
+        <h3 class="record__name">The main room</h3>
+        <p class="record__note">What the whole floor already knows.</p>
+        <span class="record__link record__link--soon">Coming soon</span>
+      </article>
+
+      <!-- SWAP: playlist three. Add data-cover + href when the link arrives. -->
+      <article class="record">
+        <div data-vinyl data-title="After" data-turn="15"></div>
+        <h3 class="record__name">After</h3>
+        <p class="record__note">Five in the morning, still going.</p>
+        <span class="record__link record__link--soon">Coming soon</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= Ø4  GALLERY ======================= -->
+<section class="gallery" id="gallery">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2" data-reveal>Nights we already had</h2>
+      <p class="lede lede--sm">Six editions, one room at a time.</p>
+    </div>
+  </div>
+
+  <!-- Two rows running opposite ways. Pure CSS loops, no per-frame
+       JavaScript, and neither reacts to the pointer. Every tile is square and
+       every file is square, so object-fit has nothing left to crop: the
+       squaring and the black and white are both baked into the WebPs, never
+       done with a CSS filter on a moving strip. Inside each row the second
+       set of figures is an exact copy of the first, which is what makes the
+       loop seamless, so rebuild both halves together. -->
+  <div class="strip" data-strip>
+    <div class="strip__track strip__track--a">
+      <figure class="shot"><img data-src="assets/img/nights/07.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/02.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/10.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/04.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/08.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/06.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/01.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/05.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/09.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/03.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/11.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/07.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/02.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/10.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/04.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/08.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/06.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/01.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/05.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/09.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/03.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/11.webp" width="900" height="900" decoding="async" alt=""></figure>
+    </div>
+    <div class="strip__track strip__track--b">
+      <figure class="shot"><img data-src="assets/img/nights/03.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/09.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/01.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/06.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/11.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/08.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/05.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/02.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/07.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/10.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot"><img data-src="assets/img/nights/04.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/03.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/09.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/01.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/06.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/11.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/08.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/05.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/02.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/07.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/10.webp" width="900" height="900" decoding="async" alt=""></figure>
+      <figure class="shot" aria-hidden="true"><img data-src="assets/img/nights/04.webp" width="900" height="900" decoding="async" alt=""></figure>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ======================= Ø5  MAP ======================= -->
+<section class="venue" id="map">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2" data-reveal>Find us</h2>
+    </div>
+
+    <div class="venue__grid">
+      <div class="venue__card">
+        <!-- SWAP: confirm venue, street and metro before this goes out -->
+        <h3 class="venue__name">Frecuencia</h3>
+        <p class="venue__addr">Calle de Lagasca 103<br>Salamanca, 28006 Madrid</p>
+        <ul class="rows">
+          <li><span>Metro</span><b>Núñez de Balboa</b></li>
+          <li><span>Doors</span><b>23:59</b></li>
+          <li><span>Age</span><b>18+</b></li>
+        </ul>
+        <a class="btn btn--ghost btn--wide"
+           href="https://www.google.com/maps/place/Frecuencia/@40.4341856,-3.6846612,17z/data=!3m1!4b1!4m6!3m5!1s0xd4229199f301d03:0xfded421f848f6834!8m2!3d40.4341856!4d-3.6846612"
+           target="_blank" rel="noopener">Open in Google Maps</a>
+      </div>
+
+      <!-- The Google embed is 1.9 MB of script, so it is only fetched once this
+           section is close. The grayscale invert is what keeps Google's white
+           map inside the palette, leave it on. Pin confirmed against the venue's
+           own Google listing: 40.4341856, -3.6846612 -->
+      <div class="venue__map">
+        <!-- ll with no q returns the map WITHOUT Google's own pin and without
+             the info card, centred exactly on the venue. That is what lets the
+             pin below be the only marker: it sits outside the iframe, so the
+             grayscale filter never touches it. Move the coordinates and the pin
+             stays correct, because it is pinned to the centre of the frame. -->
+        <div class="venue__frame" data-map
+             data-src="https://maps.google.com/maps?ll=40.4341856,-3.6846612&amp;z=16&amp;output=embed">
+          <span class="venue__map-wait">Map</span>
+        </div>
+        <svg class="pin" viewBox="0 0 28 38" aria-hidden="true">
+          <path d="M14 37C14 37 26 22.7 26 14A12 12 0 1 0 2 14c0 8.7 12 23 12 23Z"/>
+          <circle cx="14" cy="14" r="4.4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= TICKETS ======================= -->
+<section class="close" id="tickets">
+  <div class="shell">
+    <div class="head">
+      <h2 class="h2" data-reveal>Next night</h2>
+      <p class="lede lede--sm">Friday 25 September, doors 23:59, Frecuencia.</p>
+    </div>
+
+    <div class="ticket">
+      <div class="ticket__side">
+        <!-- The edition concept, as the club wrote it on the ticket page -->
+        <p class="ticket__concept">
+          No photographer tonight. Five or six disposable cameras go round the bar,
+          shooting everything: flash in your face, blur, grain, someone's back.
+          The whole roll gets developed, nothing edited out.
+        </p>
+        <p class="ticket__concept ticket__concept--last">
+          KØMNATA used to be photographed for you. Now you are the one shooting it.
+        </p>
+        <ul class="rows">
+          <li><span>Date</span><b>Fri 25 Sep 2026</b></li>
+          <li><span>Doors</span><b>23:59</b></li>
+          <li><span>Line-up</span><b>Milasmol · IlyazZz</b></li>
+          <li><span>Venue</span><b>Frecuencia, Madrid</b></li>
+        </ul>
+      </div>
+
+      <!-- Patt cannot be framed. Their headers say yes (ALLOWALL,
+           frame-ancestors *) but the app itself bounces out of a frame to
+           events.patt.club/, which then refuses with X-Frame-Options:
+           sameorigin, so the box renders empty. Tested from a clean browser.
+           This panel is the club's own event artwork instead, pulled from
+           Patt's OG endpoint, so the line-up and the prices on it are theirs
+           and not retyped here. Re-download it if the event artwork changes:
+           https://events.patt.club/og/event/6aa3105af7a2f83ab69c4620.jpg?handle=Komnata -->
+      <div class="ticket__card">
+        <img class="ticket__poster" src="assets/img/event-poster.jpg"
+             alt="KØMNATA 27 Frames. Line-up Milasmol and IlyazZz. Early Birds 18 euro, Regular 22 euro, tables from 300 euro for 5 people."
+             width="1200" height="630" loading="lazy">
+        <div class="ticket__foot">
+          <p class="ticket__until">Doors in</p>
+          <p class="count" data-countdown="2026-09-25T23:59:00+02:00">
+            <span><b>--</b>d</span><span><b>--</b>h</span><span><b>--</b>m</span><span><b>--</b>s</span>
+          </p>
+          <a class="btn btn--wide"
+             href="https://events.patt.club/pass/6aa3105af7a2f83ab69c4620?handle=Komnata&amp;utm_source=site&amp;utm_medium=web"
+             target="_blank" rel="noopener">Buy tickets on Patt</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="close__mail">Bookings and partnerships <a href="mailto:business.komnatamadrid@gmail.com">business.komnatamadrid@gmail.com</a></p>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="shell foot__grid">
+    <div class="foot__mark" role="img" aria-label="KØMNATA"></div>
+    <nav class="foot__nav">
+      <a href="#" target="_blank" rel="noopener">Telegram</a>
+      <a href="#" target="_blank" rel="noopener">Instagram</a>
+      <a href="#" target="_blank" rel="noopener">Spotify</a>
+      <a href="#map">Find us</a>
+    </nav>
+    <p class="foot__sign">Madrid · 2026</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
+<script src="components/vinyl-player/vinyl-player.js?v=2" defer></script>
+<script src="components/beams/beams.js?v=4" defer></script>
+<script src="js/main.js?v=24" defer></script>
+</body>
+</html>
