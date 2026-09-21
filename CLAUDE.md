@@ -69,6 +69,7 @@ download 3.9 MB again.
 | `Source files/` | Originals: artwork, brand marks, references. See its INDEX.md. |
 | `Dropzone_/` | Filipp drops files here. Say "ingest the dropzone" and they get filed into `Source files/`. Should normally be empty. |
 | `Videos & Images/` | 236 MB of original footage. Local only, gitignored. |
+| `KOMNATA - Hosting Handover.pdf` | The client-facing hosting doc. Source is `HOSTING HANDOVER.md`, rendered by the script in the session scratchpad. Edit the .md, re-render, keep both in step. |
 
 ## Conventions
 
