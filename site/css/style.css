@@ -471,7 +471,7 @@ a{color:inherit;text-decoration:none;}
   gap:20px 32px;font-size:13px;color:var(--mute-2);
 }
 .foot__mark{
-  width:132px;height:29px;opacity:.42;
+  width:132px;height:29px;opacity:1;
   background:url('../assets/img/wordmark-tight.png') center/100% auto no-repeat;
 }
 .foot__nav{display:flex;gap:clamp(16px,2vw,28px);flex-wrap:wrap;}
