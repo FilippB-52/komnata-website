@@ -156,7 +156,6 @@
      the hero. It gets a short lead instead. The map is far enough down that a
      full screen of warning costs nothing. */
   [['[data-map]', 'Map to the venue', '100% 0px'],
-   ['[data-tg]', 'KØMNATA on Telegram', '25% 0px'],
    ['[data-ig]', 'KØMNATA on Instagram', '25% 0px']].forEach(function (pair) {
     var box = document.querySelector(pair[0]);
     if (!box) return;
@@ -170,7 +169,7 @@
       f.scrolling = 'no';
       f.src = box.dataset.src;
       box.appendChild(f);
-      if (box.hasAttribute('data-ig') || box.hasAttribute('data-tg')) fitSlots();  // hoisted
+      if (box.hasAttribute('data-ig')) fitSlots();   // hoisted, declared below
     };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries, obs) {
@@ -195,7 +194,7 @@
   var phone = window.matchMedia('(max-width: 760px)');
 
   function fitSlots() {
-    ['[data-ig]', '[data-tg]'].forEach(function (sel) {
+    ['[data-ig]'].forEach(function (sel) {
       var slot = document.querySelector(sel);
       if (!slot || !slot.querySelector('iframe')) return;
       if (!phone.matches) {

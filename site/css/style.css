@@ -285,18 +285,24 @@ a{color:inherit;text-decoration:none;}
   background:rgba(239,236,230,.03);overflow:hidden;position:relative;
 }
 .card__slot iframe{width:100%;height:100%;min-height:230px;border:0;display:block;}
-.card__slot--mark{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-}
-.card__slot--mark img{width:74px;height:74px;opacity:.9;}
-.card__slot--mark span{
-  font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute-2);
-}
 .card__slot--light{background:#fff;}
-/* Telegram's dark embed sits on its own near-black, so the slot matches it and
-   there is no flash of a different colour while the iframe loads. */
-.card__slot--tg{background:#17212B;}
-.card__slot--tg iframe{width:100%;height:100%;min-height:330px;border:0;display:block;}
+/* The Telegram channel card. Its own slot rather than an embed, see the note
+   in the markup: the profile-style preview cannot be framed, and the channel
+   has not posted in 309 days so a live feed would say so out loud. */
+.card__slot--chan{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;text-align:center;padding:18px;
+}
+.chan__pic{
+  width:64px;height:64px;border-radius:50%;opacity:.92;margin-bottom:14px;
+}
+.chan__name{font-size:16px;font-weight:500;letter-spacing:.01em;}
+.chan__cta{
+  margin-top:18px;font-size:12.5px;color:var(--mute);
+  padding:8px 16px;border:1px solid var(--line-2);border-radius:var(--pill);
+  transition:color .25s ease,border-color .25s ease;
+}
+.card:hover .chan__cta{color:var(--bone);border-color:var(--bone);}
 .card__slot--light iframe{
   width:100%;height:100%;min-height:330px;border:0;display:block;
 }
@@ -433,10 +439,22 @@ a{color:inherit;text-decoration:none;}
 .venue__map{
   position:relative;border-radius:var(--r);overflow:hidden;background:var(--raised);
   min-height:clamp(340px,38vw,520px);
+  /* Google's embed draws an "Open in Maps" chip in its top-left corner. The
+     whole iframe is pointer-events:none, so that chip is dead: it looks like a
+     button and does nothing. It cannot be removed from a cross-origin frame,
+     so the frame is pulled up by exactly its height and the top is clipped.
+
+     Cropping only the TOP is deliberate. The Google logo and the "Map data
+     ©2026" line sit along the bottom and are required by the embed terms, so
+     they stay. The pin moves up by half the crop to stay on the venue: the
+     frame's centre, which is where the venue is, moves up by that much. */
+  --map-top-crop:48px;
 }
 .venue__frame{position:absolute;inset:0;}
 .venue__map iframe{
-  position:absolute;inset:0;width:100%;height:100%;border:0;
+  position:absolute;left:0;right:0;
+  top:calc(var(--map-top-crop) * -1);
+  width:100%;height:calc(100% + var(--map-top-crop));border:0;
   filter:grayscale(1) invert(.92) contrast(.86) brightness(.94);
   pointer-events:none;
 }
@@ -445,7 +463,9 @@ a{color:inherit;text-decoration:none;}
    sits on the centre of the frame, which is the venue, because the embed is
    centred with ll= . */
 .pin{
-  position:absolute;left:50%;top:50%;width:26px;height:35px;
+  position:absolute;left:50%;
+  top:calc(50% - var(--map-top-crop) / 2);
+  width:26px;height:35px;
   translate:-50% -100%;fill:var(--cyan);pointer-events:none;
 }
 .pin circle{fill:var(--night);}
@@ -562,17 +582,17 @@ a{color:inherit;text-decoration:none;}
      white under the last row. A square slot is ~340px of render height at the
      same scale, which lands on the bottom of the second row. */
   .card__slot{margin-top:12px;min-height:0;aspect-ratio:1;border-radius:12px;}
-  .card__slot--mark{gap:10px;}
-  .card__slot--mark img{width:42px;height:42px;}
-  .card__slot--mark span{font-size:9px;letter-spacing:.12em;}
+  .card__slot--chan{padding:10px;gap:1px;}
+  .chan__pic{width:40px;height:40px;margin-bottom:9px;}
+  .chan__name{font-size:13px;}
+  .chan__cta{margin-top:11px;font-size:10.5px;padding:6px 11px;}
   .card__go{margin-top:12px;font-size:12px;}
 
   /* Instagram's embed has a minimum sensible width, well above the ~140px of
      slot it now gets. So it is rendered at its own width and scaled down to
      fit. --ig-w/--ig-h/--ig-scale are resolved px written by main.js from the
      measured slot, never a clamp(), because a transform cannot read one. */
-  .card__slot--light iframe,
-  .card__slot--tg iframe{
+  .card__slot--light iframe{
     position:absolute;top:0;left:0;
     width:var(--ig-w,100%);height:var(--ig-h,100%);min-height:0;
     transform-origin:top left;transform:scale(var(--ig-scale,1));

@@ -46,12 +46,24 @@
     haloW:   0.34,     // half-width of the grey wash around it
     haloAmt: 0.60,     // how strong that wash gets
 
-    grain:     0.115,  // amplitude at full signal. Measured against the reference:
-                       // bright-area stddev 11.1 against its 9.5, close enough.
-    grainFloor: 0.022, // fraction of grain surviving into the blacks. At 0.10 the
-                       // blacks measured stddev 5.2 against the reference's 1.1:
-                       // its shadows are almost clean, the grain rides the light.
-    grainSpeed: 8,     // grain reshuffles this many times a second, not every frame
+    /* Texture, reworked from per-pixel grain to drifting smoke.
+
+       The first version hashed every device pixel and reshuffled it 8 times a
+       second. That is film grain, and at this density it read as a screenful
+       of glitching pixels rather than as a material. Smoke is the opposite:
+       low spatial frequency, and it FLOWS instead of being resampled.
+
+       So the texture is now smooth two-octave value noise whose sample point
+       drifts, monochrome rather than per-channel (coloured speckle reads as
+       digital noise, a luminance mottle reads as a material). A 1/255 dither
+       stays on top, because the near-black gradients still band without it,
+       but that one is a single step and invisible. */
+    grain:     0.085,  // amplitude at full signal
+    grainFloor: 0.022, // fraction surviving into the blacks. The reference's
+                       // shadows are almost clean: stddev 1.1 against 14.8 in
+                       // the midtones, so the texture rides the light.
+    grainSize: 3.4,    // device pixels per noise cell. Larger = softer, smokier
+    grainDrift: 7.0,   // device pixels a second the mottle travels
 
     /* Cost. Field work is canvas px / scale^2. dpr is 2 so the GRAIN is one
        device pixel, and scale absorbs it so the field pass costs the same as
@@ -166,13 +178,20 @@
   var FINISH =
     '#version 300 es\n' +
     'precision highp float;\n' +
-    'uniform sampler2D uField; uniform vec2 uRes; uniform float uFrame;\n' +
-    'uniform float uGrain; uniform float uFloor;\n' +
+    'uniform sampler2D uField; uniform vec2 uRes; uniform float uTime;\n' +
+    'uniform float uGrain; uniform float uFloor; uniform float uGSize; uniform float uGDrift;\n' +
     'out vec4 o;\n' +
     'float hash21(vec2 p){\n' +
     '  p = fract(p * vec2(123.34, 456.21));\n' +
     '  p += dot(p, p + 45.32);\n' +
     '  return fract(p.x * p.y);\n' +
+    '}\n' +
+    'float vnoise(vec2 p){\n' +
+    '  vec2 i = floor(p), f = fract(p);\n' +
+    '  f = f * f * (3.0 - 2.0 * f);\n' +
+    '  float a = hash21(i), b = hash21(i + vec2(1.0,0.0));\n' +
+    '  float c = hash21(i + vec2(0.0,1.0)), d = hash21(i + vec2(1.0,1.0));\n' +
+    '  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y);\n' +
     '}\n' +
     'void main(){\n' +
     '  vec2 frag = gl_FragCoord.xy;\n' +
@@ -185,10 +204,15 @@
        does. */
     '  float lum = dot(col, vec3(0.2126, 0.7152, 0.0722));\n' +
     '  float amt = uGrain * (uFloor + (1.0 - uFloor) * sqrt(clamp(lum, 0.0, 1.0)));\n' +
-    '  vec3 n = vec3(hash21(frag + uFrame * 17.0),\n' +
-    '                hash21(frag + uFrame * 17.0 + 31.7),\n' +
-    '                hash21(frag + uFrame * 17.0 + 71.3)) - 0.5;\n' +
-    '  col += n * amt * 2.0;\n' +
+    /* two octaves drifting in different directions, so the mottle folds through
+       itself instead of sliding across the screen as one sheet */
+    '  vec2 gp = frag / uGSize;\n' +
+    '  vec2 dr = vec2(uTime * uGDrift, uTime * -uGDrift * 0.7) / uGSize;\n' +
+    '  float n = vnoise(gp + dr) * 0.66 + vnoise(gp * 2.17 - dr * 1.4) * 0.34;\n' +
+    '  col += (n - 0.5) * amt * 2.0;\n' +
+    /* one step of dither, which is all the near-black gradients need to stop
+       banding, and far too fine to read as texture */
+    '  col += (hash21(frag * 1.37) - 0.5) / 255.0;\n' +
     '  o = vec4(clamp(col, 0.0, 1.0), 1.0);\n' +
     '}\n';
 
@@ -226,7 +250,7 @@
 
   var uF = uniforms(fieldProg, ['uRes','uTime','uHi','uMid','uBg','uMouse','uOn','uReach','uVel',
                                 'uZoom','uWander','uSpin','uLevel','uCoreIn','uCoreW','uHaloW','uHaloAmt']);
-  var uN = uniforms(finishProg, ['uField','uRes','uFrame','uGrain','uFloor']);
+  var uN = uniforms(finishProg, ['uField','uRes','uTime','uGrain','uFloor','uGSize','uGDrift']);
 
   var vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
@@ -269,7 +293,7 @@
 
   /* --- loop -------------------------------------------------------------- */
   var mx = 0, my = 0, vx = 0, vy = 0, on = 0;
-  var raf = 0, last = -1, clock = 0, prevFrame = 0, grainFrame = 0;
+  var raf = 0, last = -1, clock = 0, prevFrame = 0;
   var running = false, wanted = false;
 
   function frame(now) {
@@ -279,7 +303,6 @@
     var dt = last < 0 ? 0 : Math.min((now - last) / 1000, 0.05);
     last = now; prevFrame = now;
     clock = (clock + dt * CFG.speed) % 3600;
-    grainFrame = Math.floor(now / (1000 / CFG.grainSpeed)) % 1024;
 
     var dpr = Math.min(window.devicePixelRatio || 1, CFG.dpr);
     var cw = canvas.clientWidth || 1, ch = canvas.clientHeight || 1;
@@ -331,9 +354,11 @@
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.uniform1i(uN.uField, 0);
     gl.uniform2f(uN.uRes, bw, bh);
-    gl.uniform1f(uN.uFrame, grainFrame);
+    gl.uniform1f(uN.uTime, now / 1000);
     gl.uniform1f(uN.uGrain, CFG.grain);
     gl.uniform1f(uN.uFloor, CFG.grainFloor);
+    gl.uniform1f(uN.uGSize, CFG.grainSize);
+    gl.uniform1f(uN.uGDrift, CFG.grainDrift);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 

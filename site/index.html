@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=35">
+<link rel="stylesheet" href="css/style.css?v=38">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 
@@ -259,14 +259,28 @@ alt=""></noscript>
         </span>
         <h3 class="card__name">Telegram</h3>
         <p class="card__note"><span class="card__handle">@itskomnataa</span><span class="card__desc">. Dates, drops and access land here first.</span></p>
-        <!-- Content protection is OFF as of 21 Sep 2026, re-checked: the web
-             preview at t.me/s/itskomnataa now returns 98 post widgets instead
-             of redirecting away, and post embeds carry real content. So the
-             real widget goes in. The channel has 12 posts; 12 is the newest
-             that embeds. Telegram's script writes an iframe into this slot. -->
-        <div class="card__slot card__slot--tg" data-tg
-             data-src="https://t.me/itskomnataa/12?embed=1&amp;dark=1">
-          <span class="slot__empty">Telegram</span>
+        <!-- A channel card rather than a post embed, and rather than Telegram's
+             own channel widget, for two reasons.
+
+             Telegram serves t.me/s/<channel> with X-Frame-Options: SAMEORIGIN,
+             so the profile-style preview cannot be framed at all. Only single
+             posts can, and a single post embed is what was here: it showed the
+             middle of one message, which is why it read as random.
+
+             And a live feed would be the wrong thing anyway. Checked 21 Sep
+             2026: the channel has 8 posts and the newest is 309 days old
+             (15 Nov 2025), against Instagram's 13 posts and 535 followers. A
+             "latest posts" widget would advertise that, directly under copy
+             promising drops land here first.
+
+             So: the mark, the channel name, the handle, and the way in. The
+             channel has no profile photo of its own (Telegram falls back to a
+             letter tile), so the brand mark stands in, which is better. -->
+        <div class="card__slot card__slot--chan">
+          <img class="chan__pic" src="assets/img/favicon-192.png" alt=""
+               width="192" height="192" loading="lazy" decoding="async">
+          <b class="chan__name">KØMNATA</b>
+          <span class="chan__cta">Join the channel</span>
         </div>
         <span class="card__go">Open the channel</span>
       </a>
@@ -456,7 +470,7 @@ alt=""></noscript>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
 <script src="components/vinyl-player/vinyl-player.js?v=2" defer></script>
-<script src="components/backdrop/backdrop.js?v=11" defer></script>
-<script src="js/main.js?v=35" defer></script>
+<script src="components/backdrop/backdrop.js?v=12" defer></script>
+<script src="js/main.js?v=36" defer></script>
 </body>
 </html>
