@@ -134,8 +134,11 @@ a{color:inherit;text-decoration:none;}
 }
 .nav__links a:hover,.nav__links a[aria-current="true"]{color:var(--bone);}
 @media (max-width:760px){
-  .nav__links{gap:clamp(14px,4vw,26px);}
-  .nav__links a{font-size:13.5px;}
+  /* 44px tap targets. These links are the only navigation on a phone and at
+     6px of padding they measured 35px tall. The padding grows and the gap
+     shrinks by the same amount, so the row is no wider than it was. */
+  .nav__links{gap:clamp(6px,2vw,18px);}
+  .nav__links a{font-size:13.5px;padding:13px 6px;}
 }
 
 /* --- HERO --------------------------------------------------------------- */
@@ -397,4 +400,19 @@ a{color:inherit;text-decoration:none;}
   .hero__mark{width:min(78vw,340px);}
   .hero .pills{gap:6px;}
   .pills li{font-size:12px;padding:7px 14px;}
+}
+
+/* --- TOUCH TARGETS ------------------------------------------------------ */
+/* Measured on a 390x844 phone: these sat between 20px and 27px tall against a
+   44px finger. The small round and underlined ones grow through a transparent
+   ::before so the drawn mark keeps its size; the rest take vertical padding. */
+@media (max-width:760px){
+  .hero__down::before{content:"";position:absolute;inset:-10px;border-radius:50%;}
+
+  .record__link{position:relative;}
+  .record__link::before{content:"";position:absolute;inset:-10px -14px;}
+
+  .foot__nav a,
+  .close__mail a{display:inline-block;padding-block:11px;}
+  .foot__grid{gap:8px 32px;}
 }

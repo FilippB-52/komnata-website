@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=23">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 </head>
@@ -58,9 +58,19 @@
        at original speed. The slowed and brightened experiment is still on disk
        as hero-v6b.mp4 if it is ever wanted; it is not wired up. -->
   <video class="hero__video" autoplay muted loop playsinline preload="auto"
-         poster="assets/img/hero-poster.jpg" aria-hidden="true">
-    <source src="assets/video/hero-v6.mp4" type="video/mp4">
-  </video>
+         poster="assets/img/hero-poster.jpg" aria-hidden="true"></video>
+  <script>
+    /* Phones get the 960x540 cut (1.1 MB) instead of the 1080p master (3.9 MB).
+       Indistinguishable at phone size, the hero is this dark. The element ships
+       with no src so the source is picked before anything is requested, which a
+       <source media> child cannot do: Chrome dropped media on video sources. */
+    (function () {
+      var v = document.currentScript.previousElementSibling;
+      v.src = window.matchMedia('(max-width: 760px)').matches
+        ? 'assets/video/hero-v6-mobile.mp4'
+        : 'assets/video/hero-v6.mp4';
+    })();
+  </script>
   <div class="hero__scrim" aria-hidden="true"></div>
 
   <div class="hero__inner">
