@@ -9,6 +9,26 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* --- META PIXEL EVENTS ------------------------------------------------- */
+  /* The base code in <head> fires PageView. This is the button event: the one
+     link that actually leaves for the ticket seller. InitiateCheckout is the
+     right standard event because the purchase itself completes on Patt and
+     never comes back to us, so Purchase would be a lie.
+
+     Guarded on fbq existing: an ad blocker, a tracker-blocking browser or a
+     failed CDN all leave it undefined, and this must not take the click with
+     it. The link is not delayed waiting for the beacon either. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('[data-buy]') : null;
+    if (!a || typeof window.fbq !== 'function') return;
+    try {
+      window.fbq('track', 'InitiateCheckout', {
+        content_name: 'KOMNATA 27 Frames',
+        content_category: 'event ticket'
+      });
+    } catch (err) { /* never let a tracker break a ticket link */ }
+  }, true);
+
   /* --- INPUT LOCKDOWN ---------------------------------------------------- */
   /* Deliberately above the gsap guard: if the CDN is blocked the page still
      must not pinch, and everything below this point is skipped on that return.
@@ -136,6 +156,7 @@
      the hero. It gets a short lead instead. The map is far enough down that a
      full screen of warning costs nothing. */
   [['[data-map]', 'Map to the venue', '100% 0px'],
+   ['[data-tg]', 'KØMNATA on Telegram', '25% 0px'],
    ['[data-ig]', 'KØMNATA on Instagram', '25% 0px']].forEach(function (pair) {
     var box = document.querySelector(pair[0]);
     if (!box) return;
@@ -149,7 +170,7 @@
       f.scrolling = 'no';
       f.src = box.dataset.src;
       box.appendChild(f);
-      if (box.hasAttribute('data-ig')) fitIg();   // hoisted, declared below
+      if (box.hasAttribute('data-ig') || box.hasAttribute('data-tg')) fitSlots();  // hoisted
     };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries, obs) {
@@ -165,24 +186,31 @@
      is rendered at its own width and scaled down. The numbers are resolved in
      px here and handed to CSS, because a transform cannot do arithmetic on a
      clamp() and the slot width is a clamp all the way up. */
-  var IG_RENDER = 340;
+  /* Both embeds refuse to lay out below roughly 320px, and on a phone the
+     social cards sit two up so each slot is about 140px wide. So each is
+     rendered at its own width and scaled down to fit. Resolved px are handed
+     to CSS because a transform cannot do arithmetic on a clamp, and the slot
+     width is a clamp all the way up. */
+  var EMBED_RENDER = 340;
   var phone = window.matchMedia('(max-width: 760px)');
 
-  function fitIg() {
-    var slot = document.querySelector('[data-ig]');
-    if (!slot || !slot.querySelector('iframe')) return;
-    if (!phone.matches) {
-      slot.style.removeProperty('--ig-w');
-      slot.style.removeProperty('--ig-h');
-      slot.style.removeProperty('--ig-scale');
-      return;
-    }
-    var r = slot.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    var scale = r.width / IG_RENDER;
-    slot.style.setProperty('--ig-w', IG_RENDER + 'px');
-    slot.style.setProperty('--ig-h', Math.round(r.height / scale) + 'px');
-    slot.style.setProperty('--ig-scale', scale.toFixed(4));
+  function fitSlots() {
+    ['[data-ig]', '[data-tg]'].forEach(function (sel) {
+      var slot = document.querySelector(sel);
+      if (!slot || !slot.querySelector('iframe')) return;
+      if (!phone.matches) {
+        slot.style.removeProperty('--ig-w');
+        slot.style.removeProperty('--ig-h');
+        slot.style.removeProperty('--ig-scale');
+        return;
+      }
+      var r = slot.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      var scale = r.width / EMBED_RENDER;
+      slot.style.setProperty('--ig-w', EMBED_RENDER + 'px');
+      slot.style.setProperty('--ig-h', Math.round(r.height / scale) + 'px');
+      slot.style.setProperty('--ig-scale', scale.toFixed(4));
+    });
   }
 
   /* --- RECORD DECK ------------------------------------------------------- */
@@ -240,7 +268,7 @@
     /* Arrow placement is pure CSS: the card padding and the vinyl size are
        both known there, so nothing here has to measure a box that is still
        settling. Only the dots and the Instagram scale need JS. */
-    function relayout() { sync(); fitIg(); }
+    function relayout() { sync(); fitSlots(); }
     relayout();
     window.addEventListener('resize', relayout);
     window.addEventListener('orientationchange', relayout);
@@ -248,7 +276,7 @@
 
     if ('ResizeObserver' in window) {
       var slot = document.querySelector('[data-ig]');
-      if (slot) new ResizeObserver(function () { fitIg(); }).observe(slot);
+      if (slot) new ResizeObserver(function () { fitSlots(); }).observe(slot);
     } else {
       setTimeout(relayout, 600);
     }
@@ -257,8 +285,8 @@
   if (reduce) return;
 
   /* --- BACKDROP ---------------------------------------------------------- */
-  /* Nothing behind the hero. The layer comes up across the Social section and
-     stays for the rest of the page. The tilt drifts a few degrees on the way
+  /* Nothing behind the hero. The layer comes up across the first section after it,
+     which since the reorder is Next night, and stays for the rest of the page. The tilt drifts a few degrees on the way
      down so the bands are not the same shape at the top and the bottom. */
   var backdrop = document.querySelector('[data-backdrop]');
   if (backdrop) {
@@ -280,8 +308,17 @@
        .backdrop is z-index:-1 and the hero video paints over it. By the time the video
        is gone the teal is already ~0.16 and rising, so there is no gap. */
     gsap.fromTo(backdrop, { opacity: 0 }, {
-      opacity: .52, ease: 'none',
-      scrollTrigger: { trigger: '#social', start: 'top bottom', end: 'bottom 55%', scrub: .8 }
+      /* .14, and that number is a legibility limit rather than a taste call.
+         The layer peaks at #C9CECD, so composited over the page ground the
+         brightest the ribbon ever gets behind copy is:
+           .10 -> #1E1F20  lede 5.11:1
+           .14 -> #262728  lede 4.63:1   <- here
+           .18 -> #2D2F30  lede 4.16:1   below the 4.5:1 threshold
+           .26 -> #3C3E3F  lede 3.33:1
+         Small --mute-2 labels do not clear 4.5:1 at any usable value; the
+         only place they sit directly on the backdrop is the footer. */
+      opacity: .14, ease: 'none',
+      scrollTrigger: { trigger: '#tickets', start: 'top bottom', end: 'bottom 55%', scrub: .8 }
     });
     /* Rendering is switched by scroll POSITION, never by reading the animated
        opacity: that value is scrubbed with an 0.8s lag, so sampling it inside
@@ -295,7 +332,7 @@
        change. onEnter/onLeaveBack has no far edge to fall off, so the layer
        runs from the moment Social appears until you scroll back above it. */
     ScrollTrigger.create({
-      trigger: '#social', start: 'top bottom',
+      trigger: '#tickets', start: 'top bottom',
       onEnter:     function () { if (window.KomnataBackdrop) window.KomnataBackdrop.setVisible(true); },
       onLeaveBack: function () { if (window.KomnataBackdrop) window.KomnataBackdrop.setVisible(false); }
     });
