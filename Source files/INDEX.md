@@ -30,6 +30,17 @@ different letter sizes. The web versions in `site/assets/img/headings/` are
 cropped to their ink and share one scale, so a line of capitals measures 115
 to 118px in every one.
 
+## Gallery photos
+
+The originals behind `site/assets/img/nights/12.webp` through `18.webp`, named
+by what they show so the running order can keep the same locations apart.
+
+The web versions are square, 900x900, black and white, and tone-matched to the
+eleven that were already there. That matching is not optional: straight off the
+camera these sit at a median of 6 to 14 against the existing set's 58, so
+converted as-is they drop in as near-black tiles. Each is autocontrasted then
+gamma-corrected to a median of 58.
+
 ## Design references
 
 | File | What it is |

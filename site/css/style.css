@@ -286,23 +286,36 @@ a{color:inherit;text-decoration:none;}
 }
 .card__slot iframe{width:100%;height:100%;min-height:230px;border:0;display:block;}
 .card__slot--light{background:#fff;}
-/* The Telegram channel card. Its own slot rather than an embed, see the note
-   in the markup: the profile-style preview cannot be framed, and the channel
-   has not posted in 309 days so a live feed would say so out loud. */
-.card__slot--chan{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;text-align:center;padding:18px;
+/* Telegram's dark embed sits on its own near-black, so the slot matches it and
+   nothing flashes a different colour while the iframe loads.
+
+   The ratio is header-plus-photo at the render width, 340 x 390, measured. The
+   iframe is scaled into it by main.js at EVERY width, not only on a phone like
+   Instagram, because that render height is what keeps the post's text out of
+   frame. Let it lay out at its own width and the text reappears and gets cut
+   off mid-sentence. */
+/* Telegram's dark embed sits on its own near-black, so the slot matches it and
+   nothing flashes a different colour while the iframe loads. The frame is
+   positioned and scaled by main.js at every width, not only on a phone: given
+   its real width the embed centres a max-width bubble and paints the rest
+   white, which is glaring here. */
+.card__slot--tg{
+  background:#17212B;
+  /* Telegram leaves a 7px white gutter down the left of its embed, where the
+     channel avatar sits outside the bubble. Measured at the render width, so
+     it is a constant there whatever the slot ends up being. The frame is made
+     that much wider and pushed left by the same amount: translate comes after
+     scale in the list, so it applies BEFORE it and gets scaled with the rest,
+     which is what keeps the crop exact at every width. */
+  --tg-gutter:7px;
 }
-.chan__pic{
-  width:64px;height:64px;border-radius:50%;opacity:.92;margin-bottom:14px;
+.card__slot--tg iframe{
+  position:absolute;top:0;left:0;
+  width:calc(var(--ig-w,100%) + var(--tg-gutter));
+  height:var(--ig-h,100%);min-height:0;border:0;display:block;
+  transform-origin:top left;
+  transform:scale(var(--ig-scale,1)) translateX(calc(var(--tg-gutter) * -1));
 }
-.chan__name{font-size:16px;font-weight:500;letter-spacing:.01em;}
-.chan__cta{
-  margin-top:18px;font-size:12.5px;color:var(--mute);
-  padding:8px 16px;border:1px solid var(--line-2);border-radius:var(--pill);
-  transition:color .25s ease,border-color .25s ease;
-}
-.card:hover .chan__cta{color:var(--bone);border-color:var(--bone);}
 .card__slot--light iframe{
   width:100%;height:100%;min-height:330px;border:0;display:block;
 }
@@ -400,11 +413,15 @@ a{color:inherit;text-decoration:none;}
 }
 .strip__track{
   display:flex;align-items:center;gap:clamp(12px,1.4vw,20px);width:max-content;
-  animation:strip 74s linear infinite;
+  /* Durations are scaled to the tile count, not fixed. The row went from 11
+     tiles to 18, and leaving the clock alone would have sped the scroll up by
+     64% because the track got that much longer over the same period.
+     74s x 18/11 = 121, 91s x 18/11 = 149, delay -37 x 18/11 = -61. */
+  animation:strip 121s linear infinite;
 }
 /* the lower row runs the other way, and on a different clock so the two never
    line up and read as one block sliding */
-.strip__track--b{animation-duration:91s;animation-direction:reverse;animation-delay:-37s;}
+.strip__track--b{animation-duration:149s;animation-direction:reverse;animation-delay:-61s;}
 @keyframes strip{from{transform:translate3d(0,0,0);}to{transform:translate3d(-50%,0,0);}}
 /* One height for the whole strip. Width comes from each shot's own
    aspect-ratio, set inline from the source file, so nothing is ever cropped.
@@ -582,10 +599,6 @@ a{color:inherit;text-decoration:none;}
      white under the last row. A square slot is ~340px of render height at the
      same scale, which lands on the bottom of the second row. */
   .card__slot{margin-top:12px;min-height:0;aspect-ratio:1;border-radius:12px;}
-  .card__slot--chan{padding:10px;gap:1px;}
-  .chan__pic{width:40px;height:40px;margin-bottom:9px;}
-  .chan__name{font-size:13px;}
-  .chan__cta{margin-top:11px;font-size:10.5px;padding:6px 11px;}
   .card__go{margin-top:12px;font-size:12px;}
 
   /* Instagram's embed has a minimum sensible width, well above the ~140px of

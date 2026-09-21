@@ -156,6 +156,7 @@
      the hero. It gets a short lead instead. The map is far enough down that a
      full screen of warning costs nothing. */
   [['[data-map]', 'Map to the venue', '100% 0px'],
+   ['[data-tg]', 'KØMNATA on Telegram', '25% 0px'],
    ['[data-ig]', 'KØMNATA on Instagram', '25% 0px']].forEach(function (pair) {
     var box = document.querySelector(pair[0]);
     if (!box) return;
@@ -169,7 +170,7 @@
       f.scrolling = 'no';
       f.src = box.dataset.src;
       box.appendChild(f);
-      if (box.hasAttribute('data-ig')) fitSlots();   // hoisted, declared below
+      if (box.hasAttribute('data-ig') || box.hasAttribute('data-tg')) fitSlots();  // hoisted
     };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries, obs) {
@@ -185,19 +186,35 @@
      is rendered at its own width and scaled down. The numbers are resolved in
      px here and handed to CSS, because a transform cannot do arithmetic on a
      clamp() and the slot width is a clamp all the way up. */
-  /* Both embeds refuse to lay out below roughly 320px, and on a phone the
-     social cards sit two up so each slot is about 140px wide. So each is
-     rendered at its own width and scaled down to fit. Resolved px are handed
-     to CSS because a transform cannot do arithmetic on a clamp, and the slot
-     width is a clamp all the way up. */
+  /* Neither embed lays out sensibly below about 320px, and the social cards
+     sit two up on a phone, so each slot is about 140px wide there. Both are
+     therefore rendered at a fixed width and scaled to fit. Resolved px are
+     handed to CSS because a transform cannot do arithmetic on a clamp, and the
+     slot width is a clamp all the way up.
+
+     The slots are the same size as each other, which is the point: a live
+     embed beside a static card looked wrong, and two embeds at different sizes
+     would too.
+
+     Instagram is only scaled on a phone; above that it lays out fine at the
+     slot's real width. Telegram is scaled at EVERY width, for a different
+     reason than height: its message bubble has a max width, so given a 530px
+     slot it centres the bubble and paints the rest of the frame WHITE, which
+     is glaring in a monochrome dark card. At a 340px render the bubble fills
+     the frame edge to edge, so that is what gets rendered and scaled up.
+
+     The render height stays derived from the slot in both cases, so each frame
+     shows exactly its slot's worth of the top of the post. The post's text
+     never reaches the frame because its photo alone is roughly as tall as the
+     slot is wide. */
   var EMBED_RENDER = 340;
   var phone = window.matchMedia('(max-width: 760px)');
 
   function fitSlots() {
-    ['[data-ig]'].forEach(function (sel) {
-      var slot = document.querySelector(sel);
+    [['[data-ig]', false], ['[data-tg]', true]].forEach(function (pair) {
+      var slot = document.querySelector(pair[0]);
       if (!slot || !slot.querySelector('iframe')) return;
-      if (!phone.matches) {
+      if (!pair[1] && !phone.matches) {
         slot.style.removeProperty('--ig-w');
         slot.style.removeProperty('--ig-h');
         slot.style.removeProperty('--ig-scale');
@@ -276,6 +293,8 @@
     if ('ResizeObserver' in window) {
       var slot = document.querySelector('[data-ig]');
       if (slot) new ResizeObserver(function () { fitSlots(); }).observe(slot);
+      var tg = document.querySelector('[data-tg]');
+      if (tg) new ResizeObserver(function () { fitSlots(); }).observe(tg);
     } else {
       setTimeout(relayout, 600);
     }
