@@ -256,12 +256,12 @@
 
   if (reduce) return;
 
-  /* --- BEAMS ------------------------------------------------------------- */
+  /* --- BACKDROP ---------------------------------------------------------- */
   /* Nothing behind the hero. The layer comes up across the Social section and
      stays for the rest of the page. The tilt drifts a few degrees on the way
      down so the bands are not the same shape at the top and the bottom. */
-  var beams = document.querySelector('[data-beams]');
-  if (beams) {
+  var backdrop = document.querySelector('[data-backdrop]');
+  if (backdrop) {
     /* The shader is deliberately left bright and the layer is dimmed here
        instead: opacity on a composited layer is free, turning the light down
        in the shader is not, and this is the one number to change if it wants
@@ -276,11 +276,11 @@
        to 0.0 for ~500px below it. That flat band is what read as a hard cut,
        not any brightness step at the seam, which measures 5/765.
 
-       Starting at 'top bottom' costs nothing during the hero, because .beams
-       is z-index:-1 and the hero video paints over it. By the time the video
+       Starting at 'top bottom' costs nothing during the hero, because
+       .backdrop is z-index:-1 and the hero video paints over it. By the time the video
        is gone the teal is already ~0.16 and rising, so there is no gap. */
-    gsap.fromTo(beams, { opacity: 0 }, {
-      opacity: .37, ease: 'none',
+    gsap.fromTo(backdrop, { opacity: 0 }, {
+      opacity: .34, ease: 'none',
       scrollTrigger: { trigger: '#social', start: 'top bottom', end: 'bottom 55%', scrub: .8 }
     });
     /* Rendering is switched by scroll POSITION, never by reading the animated
@@ -296,14 +296,8 @@
        runs from the moment Social appears until you scroll back above it. */
     ScrollTrigger.create({
       trigger: '#social', start: 'top bottom',
-      onEnter:      function () { if (window.KomnataBeams) window.KomnataBeams.setVisible(true); },
-      onLeaveBack:  function () { if (window.KomnataBeams) window.KomnataBeams.setVisible(false); }
-    });
-    ScrollTrigger.create({
-      start: 0, end: 'max',
-      onUpdate: function (self) {
-        if (window.KomnataBeams) window.KomnataBeams.setDrift(self.progress);
-      }
+      onEnter:     function () { if (window.KomnataBackdrop) window.KomnataBackdrop.setVisible(true); },
+      onLeaveBack: function () { if (window.KomnataBackdrop) window.KomnataBackdrop.setVisible(false); }
     });
   }
 

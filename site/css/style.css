@@ -80,22 +80,15 @@ a{color:inherit;text-decoration:none;}
 .shell{max-width:var(--max);margin-inline:auto;padding-inline:var(--gutter);width:100%;}
 
 /* --- BEAMS -------------------------------------------------------------- */
-.beams{
+.backdrop{
   position:fixed;inset:0;z-index:-1;pointer-events:none;
   opacity:0;                       /* JS scrubs this in across the Social section */
 }
-.beams canvas{display:block;width:100%;height:100%;}
-/* Only the outer edge, and gently. The field itself is wider and taller than
-   the viewport, so nothing is actually cut off; this just stops the layer
-   ending on a hard rectangle against the page. An earlier version pulled the
-   fade to 26% and a radial on top, which squeezed the beams into a band in a
-   box instead of letting them run out of frame. */
-.beams__fade{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(to right,  var(--night) 0%, rgba(11,12,13,0) 13%, rgba(11,12,13,0) 87%, var(--night) 100%),
-    linear-gradient(to bottom, var(--night) 0%, rgba(11,12,13,0) 11%, rgba(11,12,13,0) 89%, var(--night) 100%);
-}
+.backdrop canvas{display:block;width:100%;height:100%;}
+/* No DOM edge-fade any more. The old beams needed one because the beam field
+   was finite and stopped dead mid-screen; this shader vignettes itself in the
+   last line of its own fragment pass, which also means the fade follows the
+   colour instead of painting flat page-black over it. */
 
 /* --- TYPE --------------------------------------------------------------- */
 /* Onest, uppercase, one weight above body. Large and quiet, not shouted. */
@@ -198,16 +191,34 @@ a{color:inherit;text-decoration:none;}
 }
 .hero__scrim{
   position:absolute;inset:0;
-  /* The last stop used to be .82, which left 18% of the video still live right
-     up to the hero's bottom edge, so the grain stopped dead on a line. The
-     curve through 88% is unchanged; the final 12% closes to solid so the video
-     has dissolved into the page colour before the edge and there is no texture
-     boundary to see. */
   background:linear-gradient(180deg,
     rgba(11,12,13,.42) 0%,
     rgba(11,12,13,.10) 38%,
     rgba(11,12,13,.82) 88%,
     rgba(11,12,13,1) 100%);
+}
+
+/* The hero's bottom edge was a visible line, and darkening the video there did
+   not fix it, because the problem is occlusion rather than colour. The video is
+   an opaque rectangle sitting on top of a FIXED backdrop layer, so the backdrop
+   was hidden for exactly the hero's height and then appeared, in full, along a
+   perfectly straight edge. A step of only 4/765 still reads as a hard line when
+   it runs the whole width at a fixed position.
+
+   So the hero's own bottom is masked away instead. The video and its scrim fade
+   their alpha out over the last 45%, which lets the backdrop come through
+   gradually and makes the two cross-fade. The stops are eased rather than
+   linear: a straight ramp puts a visible knee at each end. */
+.hero__video,
+.hero__scrim{
+  -webkit-mask-image:linear-gradient(to bottom,
+    #000 0%, #000 55%,
+    rgba(0,0,0,.93) 66%, rgba(0,0,0,.74) 76%,
+    rgba(0,0,0,.44) 86%, rgba(0,0,0,.17) 94%, rgba(0,0,0,0) 100%);
+          mask-image:linear-gradient(to bottom,
+    #000 0%, #000 55%,
+    rgba(0,0,0,.93) 66%, rgba(0,0,0,.74) 76%,
+    rgba(0,0,0,.44) 86%, rgba(0,0,0,.17) 94%, rgba(0,0,0,0) 100%);
 }
 .hero__inner{
   position:relative;display:flex;flex-direction:column;align-items:center;

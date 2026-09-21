@@ -17,26 +17,33 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
 <link rel="preload" href="assets/fonts/Onest-VariableFont_wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=33">
+<link rel="stylesheet" href="css/style.css?v=34">
 <link rel="stylesheet" href="components/vinyl-player/vinyl-player.css?v=2">
 <script>document.documentElement.className="js";</script>
 </head>
 
 <body>
 
-<!-- ===== BEAMS =========================================================
-     Vanilla Three.js port of the Beams component. Two fields of noise-
-     displaced planes laid almost flat, crossing each other, lit by one
-     directional light each. It sits at z-index -1 under the page, so any
-     section with its own background hides it and it reads between them.
-     The layer ends in a fade to the page ground on all four sides: the
-     beam field is finite and its ends would otherwise stop dead mid-screen.
-     JS brings it up across the Social section, so the hero is untouched.
-     Every knob is in CFG at the top of beams.js.
+<!-- ===== BACKDROP ======================================================
+     The page's background: a drifting ribbon field in the brand cyan, raw
+     WebGL2, no dependencies. One fixed full-viewport layer at z-index -1,
+     so it spans the whole site rather than belonging to any section, and
+     anything with its own background sits on top of it.
+
+     It reacts to the cursor, gently. Touch is ignored: a finger on a phone
+     is already busy scrolling.
+
+     JS brings it up across the Social section so the hero stays clean, and
+     the hero's own bottom is masked so the two cross-fade rather than the
+     layer appearing along a line.
+
+     Replaced the Three.js beams on 21 Sep 2026. Three was loaded for that
+     one file and nothing else, so it went too. The old version and how to
+     restore it are in the project's "Background versions" folder. Every
+     knob is in CFG at the top of backdrop.js.
      ==================================================================== -->
-<div class="beams" data-beams aria-hidden="true">
+<div class="backdrop" data-backdrop aria-hidden="true">
   <canvas></canvas>
-  <span class="beams__fade"></span>
 </div>
 
 <!-- ======================= NAV ======================= -->
@@ -104,7 +111,7 @@
           </svg>
         </span>
         <h3 class="card__name">Telegram</h3>
-        <p class="card__note"><span class="card__handle">@itskomnataa</span><span class="card__desc">Dates, drops and access land here first.</span></p>
+        <p class="card__note"><span class="card__handle">@itskomnataa</span><span class="card__desc">. Dates, drops and access land here first.</span></p>
         <!-- Telegram's own post widget renders an empty stub for this channel:
              every post embed returns "Please open Telegram to view this post"
              and t.me/s/itskomnataa redirects away instead of showing the web
@@ -130,7 +137,7 @@
           </svg>
         </span>
         <h3 class="card__name">Instagram</h3>
-        <p class="card__note"><span class="card__handle">@itskomnata</span><span class="card__desc">The room, the crowd, the recaps.</span></p>
+        <p class="card__note"><span class="card__handle">@itskomnata</span><span class="card__desc">. The room, the crowd, the recaps.</span></p>
         <!-- Instagram's own profile embed. It is the only free endpoint that
              still shows a whole grid, it needs no token, and it updates itself.
              It only renders on white, which is why it sits on its own panel. -->
@@ -416,12 +423,11 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
 <script src="components/vinyl-player/vinyl-player.js?v=2" defer></script>
-<script src="components/beams/beams.js?v=5" defer></script>
-<script src="js/main.js?v=29" defer></script>
+<script src="components/backdrop/backdrop.js?v=4" defer></script>
+<script src="js/main.js?v=30" defer></script>
 </body>
 </html>
