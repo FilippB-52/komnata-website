@@ -275,9 +275,68 @@
   var vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
 
+  /* --- can this device actually FILTER a half-float texture? -------------- */
+  /* A float target is only worth having if it also interpolates. The extension
+     promises RENDERABLE, never FILTERABLE, and several drivers hand back a
+     valid RGBA16F target and then sample it NEAREST. That is fatal here rather
+     than cosmetic: the ribbon edge is cut from this texture at full resolution,
+     so without interpolation the edge snaps to the field texel grid and becomes
+     a hard staircase one texel wide. At scale 5 on a dpr-1 screen that is a
+     visible 5px cliff, which is what the background looked like on Stas's
+     machine on 22 Sept while it was smooth on every machine here.
+
+     So prove it instead of trusting it: upload a two-texel ramp, sample the
+     midpoint, read it back. Linear lands on ~128, nearest on 0 or 255. */
+  function halfFloatFilters() {
+    var pr = link('#version 300 es\nprecision highp float;\n' +
+                  'uniform sampler2D uT; out vec4 o;\n' +
+                  'void main(){ o = vec4(texture(uT, vec2(0.5)).r, 0.0, 0.0, 1.0); }\n', 'probe');
+    if (!pr) return false;
+    var src = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, src);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    /* 2x1 RGBA16F, red 0.0 then red 1.0. 0x3C00 is half-float 1.0 */
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, 2, 1, 0, gl.RGBA, gl.HALF_FLOAT,
+                  new Uint16Array([0, 0, 0, 0x3C00, 0x3C00, 0, 0, 0x3C00]));
+    var dst = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, dst);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    var f = gl.createFramebuffer(), mid = -1;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, dst, 0);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE) {
+      gl.bindVertexArray(vao);
+      gl.viewport(0, 0, 1, 1);
+      gl.useProgram(pr);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, src);
+      gl.uniform1i(gl.getUniformLocation(pr, 'uT'), 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      var px = new Uint8Array(4);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      mid = px[0];
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteFramebuffer(f); gl.deleteTexture(src); gl.deleteTexture(dst); gl.deleteProgram(pr);
+    return mid > 64 && mid < 192;
+  }
+
   /* --- reduced-resolution render target ---------------------------------- */
   var fbo = gl.createFramebuffer(), tex = null, fw = 0, fh = 0;
-  var halfFloat = !!gl.getExtension('EXT_color_buffer_float');
+  /* EXT_color_buffer_half_float is the one plenty of mobile GPUs expose. The
+     _float one also covers 32-bit and a lot of Android drivers ship without it,
+     so asking only for that name put those devices on the 8-bit path. Either
+     extension makes RGBA16F renderable. OES_texture_float_linear is what turns
+     the filtering on where it is optional. */
+  gl.getExtension('OES_texture_float_linear');
+  gl.getExtension('OES_texture_half_float_linear');
+  var halfFloat = !!(gl.getExtension('EXT_color_buffer_float') ||
+                     gl.getExtension('EXT_color_buffer_half_float')) && halfFloatFilters();
 
   function resizeTarget(w, h) {
     if (w === fw && h === fh && tex) return;
@@ -290,8 +349,10 @@
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /* Half float, because the texture now carries a SCALAR that gets a
        smoothstep cut across it. At 8 bits the core's 0.055 width is about 14
-       levels, and the ribbon edge would band. Falls back to 8-bit if the
-       device cannot render to float, which only costs a little edge quality. */
+       levels, and the ribbon edge would band. Falls back to 8-bit if the device
+       cannot render to float OR cannot filter it, which costs a little edge
+       quality. Filtering is the one that must not be guessed: 8-bit and linear
+       still reads smooth, float and nearest does not. */
     gl.texImage2D(gl.TEXTURE_2D, 0, halfFloat ? gl.RGBA16F : gl.RGBA8, w, h, 0, gl.RGBA,
                   halfFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
