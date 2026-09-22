@@ -652,13 +652,20 @@ a{color:inherit;text-decoration:none;}
 .tab__pane .btn{margin-top:24px;}
 
 @media (max-width:760px){
-  .tabs{gap:5px;padding-bottom:12px;margin-bottom:20px;}
+  /* No rule under the pills on a phone. .ticket__side already draws one right
+     above them, and two hairlines 60px apart with three pills trapped between
+     them read as a broken table rather than a control. Spacing separates them
+     here instead. */
+  .tabs{gap:6px;padding-bottom:0;margin-bottom:18px;border-bottom:0;}
   /* 44px tall, like every other control on a phone */
   .tabs__btn{font-size:12px;padding:13px 14px;flex:1;}
   .setlist{flex-direction:column;align-items:center;text-align:center;height:auto;}
   /* the phone pane is already the tallest of the three, so the record stays
-     small there: making it bigger would just grow the frame for all of them */
-  .setlist__side [data-vinyl]{--v-size:min(168px,42vw);}
+     small there: making it bigger would just grow the frame for all of them.
+     Every pane shares one grid cell, so this number sets the height of the
+     whole card on a phone. 168 -> 150 takes 18px off all three at once. */
+  .setlist__side{gap:14px;}
+  .setlist__side [data-vinyl]{--v-size:min(150px,39vw);}
   .venue__map--tab{height:104px;}
 }
 
@@ -807,8 +814,13 @@ a{color:inherit;text-decoration:none;}
      plain copy under the heading and the countdown card follows it directly.
      The rows go: the lede above already gives date, doors and venue, and the
      poster carries the line-up, so every row was a duplicate here. */
-  .ticket{gap:22px;}
-  .ticket__side{background:none;padding:0;}
+  .ticket{gap:18px;}
+  /* 18px, the same number as .ticket__foot below, so the tabs, the copy, the
+     table and the Buy button all hang off ONE vertical line. This was 0, which
+     put every word hard against the card's 24px radius and clipped the tab
+     pills at both ends: measured at 390px, every block sat at x=20 and x=370,
+     which is the card's own edge. */
+  .ticket__side{background:none;padding:16px 18px 18px;}
   .ticket__side:hover{background:none;}
   /* The table used to be hidden here, because the line under the heading
      already gave date, doors and venue. With tabs it goes back: the pane is
@@ -817,7 +829,30 @@ a{color:inherit;text-decoration:none;}
   .ticket__concept{font-size:15px;line-height:1.7;max-width:none;}
   .ticket__concept--last{margin-top:12px;}
   .ticket__foot{padding:18px;}
-  .count{margin:12px 0 18px;}
+  .count{margin:10px 0 15px;}
+
+  /* The table was four full-width rows, each with its own hairline, 51px tall:
+     231px spent on four short facts, and it read as a wall rather than a
+     spec list. Two columns with the label over the value, and ONE rule above
+     the group instead of four through it, carries the same four facts in about
+     half the height. The label takes the mono treatment already used by
+     "DOORS IN" above it, so the two blocks read as one family.
+
+     Scoped to .tab__pane so the desktop table, which has the width for full
+     rows, is untouched. */
+  .tab__pane .rows{
+    grid-template-columns:1fr 1fr;gap:15px 18px;
+    margin-top:20px;padding-top:18px;border-top:1px solid var(--line);
+  }
+  .tab__pane .rows li{display:block;padding:0;border-top:0;gap:0;}
+  .tab__pane .rows span{
+    display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute-2);
+  }
+  .tab__pane .rows b{display:block;margin-top:5px;font-size:15px;color:var(--bone);}
+
+  /* Music keeps its layout, it only gets the tighter table and a smaller gap. */
+  .setlist{gap:18px;}
 }
 
 /* --- TOUCH TARGETS ------------------------------------------------------ */
