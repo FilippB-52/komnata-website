@@ -3,7 +3,7 @@
 Site for the KØMNATA party brand, Madrid. Built for the 27 Frames night on
 Friday 25 September 2026 at Frecuencia, Calle de Lagasca 103.
 
-**Live:** https://komnata-website.vercel.app
+**Live:** https://itskomnata.com  ·  also https://komnata-website.vercel.app
 
 ## Where things are
 

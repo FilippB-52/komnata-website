@@ -24,11 +24,11 @@ Where it lives now:
 
 | | |
 |---|---|
-| Live at | https://komnata-website.vercel.app |
+| Live at | **https://itskomnata.com**, and still on https://komnata-website.vercel.app |
 | Code | `github.com/FilippB-52/komnata-website` |
 | Host | Vercel, project `komnata-website`, under the **Hosy** team |
 | Deploys | automatically, on every push to `main` |
-| Domain | none attached yet, the domain is at Namecheap and still points elsewhere |
+| Domain | **attached and working since 23 Sep 2026.** Registered at Namecheap, DNS served by Namecheap BasicDNS, two A records at 76.76.21.21. Certificates issued by Vercel automatically. **Renews 15 Oct 2026** |
 
 ---
 

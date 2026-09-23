@@ -1,7 +1,8 @@
 # KØMNATA website
 
 Client site for the KØMNATA party brand in Madrid. Vanilla HTML/CSS/JS, no
-build step. Live at https://komnata-website.vercel.app, deployed from
+build step. Live at https://itskomnata.com (and on
+https://komnata-website.vercel.app), deployed from
 `main` on push. Repo `FilippB-52/komnata-website`.
 
 Only `site/` is served. `vercel.json` pins the web root there, so everything
@@ -33,6 +34,37 @@ edge bands.
 SwiftShader, which rasterises on the CPU and wildly over-penalises both
 `backdrop-filter` and heavy fragment shaders. It reported a 2.5x desktop
 regression that did not exist. Launch with `--use-gl=angle --use-angle=metal`.
+
+**Never select the backdrop's float target on the extension alone.**
+`EXT_color_buffer_float` promises RGBA16F is RENDERABLE, never FILTERABLE, and
+several drivers hand back a valid target and then sample it NEAREST. The ribbon
+edge is cut from that texture at full resolution, so without interpolation the
+edge snaps to the field texel grid: a hard 5px staircase at `scale:5` on a dpr-1
+screen. That is what the background looked like on Stas's machine on 22 Sep
+while it was smooth on every machine here. `backdrop.js` now uploads a two-texel
+ramp, samples the midpoint and reads it back before trusting the format. **8-bit
+AND linear reads smooth; float AND nearest does not.**
+
+**IE's campus wifi blocks itskomnata.com as "high-risk"** and decrypts HTTPS to
+do it, so on campus the certificate is issued by `Instituto de Empresa SL
+Forward Trust CA`, not Let's Encrypt. `komnata-website.vercel.app` is not
+intercepted, which makes a useful control. **Do not debug this as a site fault.**
+Prove the site from outside their network, and the fix is a recategorisation
+request at `urlfiltering.paloaltonetworks.com`, not anything in this repo.
+
+**The Meta Pixel transmits NOTHING when `navigator.webdriver` is true.** Not one
+event, not even PageView, on a perfectly correct install. Any Playwright test of
+the pixel must spoof that flag or it will report zero and look like a bug.
+
+**`.ticket__side` is what controls the mobile card's margins.** It is declared
+three times and only the `max-width:760px` one applies on a phone. It held
+`padding:0`, which put every block on the card's own edge and, because `.ticket`
+has `overflow:hidden` and a 24px radius, clipped the tab pills at both ends.
+It is now 18px, matching `.ticket__foot`, so everything shares one vertical line.
+
+**Every Next Night pane shares one grid cell**, so the tallest sets the card's
+height. On a phone that is Music, which means the record's `--v-size` is the
+knob that shortens the whole card, not anything in Summary.
 
 **The Google Maps button must use the Maps URL API,** not a copied share link.
 A share URL was in there and resolved to nothing: empty search bar, blank card,
